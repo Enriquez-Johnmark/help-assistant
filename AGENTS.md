@@ -17,7 +17,12 @@ Code follows the build order in `docs/architecture.md`, one milestone at a time;
 
 ## Owner decisions
 
-Every decision needing the owner's judgement is put as numbered rounds of questions, each with a recommended answer, worded so "yes" accepts it. Record every approved decision, dated, in `docs/decisions.md`.
+Every decision needing the owner's judgement is put as numbered rounds of questions, each with a recommended answer, worded so "yes" accepts it. Record every approved decision, dated, in `docs/decisions.md`. Record hard-to-reverse, non-obvious trade-offs in `docs/adr/`, and the project's words in `GLOSSARY.md`; use those words in code, docs and messages.
+
+## Working here
+
+- **The `milestone` skill** (`.claude/skills/milestone/SKILL.md`) is the workflow for building a milestone, from the first failing test to the code review. Read it before changing `src/`.
+- **Cloud sessions:** `scripts/cloud-session-start.sh` runs at session start (via `.claude/settings.json`): commit signing, `uv sync`, and indexing the help pages. On a local machine it does nothing.
 
 ## Rules
 
