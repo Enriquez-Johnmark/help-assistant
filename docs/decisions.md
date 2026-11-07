@@ -11,3 +11,4 @@ Every decision the owner made, dated.
 - **Licence:** MIT.
 - **Commits:** signed, so GitHub shows them as verified.
 - **Brief:** approved (`docs/product/brief.md`).
+- **Spec Round 1** (`docs/product/spec.md`): a made-up company, Halimbawa Money, with about 25 made-up help pages; English pages, answers in the customer's language; local keyword and multilingual search, both measured; Claude Haiku answers, Sonnet compared; citations and every number checked in code, else "I don't know"; secrets hidden before storing or sending.
