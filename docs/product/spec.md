@@ -1,6 +1,6 @@
 # Spec: Help Assistant
 
-Decided round by round with the owner; the single source for spec decisions. The brief is `brief.md`. Status: **in progress** (Rounds 1–2 decided 2026-11-07).
+Decided round by round with the owner; the single source for spec decisions. The brief is `brief.md`. Status: **complete** (Rounds 1–3 decided 2026-11-07), with 27 acceptance criteria.
 
 ## Words
 
@@ -81,3 +81,55 @@ Decided round by round with the owner; the single source for spec decisions. The
 
 - Python 3.12 with **uv**, **ruff** (lint and format), **pyright** in strict mode, **pytest**, and the official Anthropic SDK.
 - Every acceptance criterion has a test named after it; CI runs them all.
+
+## Acceptance criteria (Round 3, 2026-11-07)
+
+Each has a test whose name starts with its ID.
+
+**A. Help pages and search**
+
+- **A1.** Help pages are read into passages, each knowing its page and heading; reading them again adds nothing new.
+- **A2.** A Taglish or Tagalog question finds the English page that answers it: the right page is in the top 5 for at least 90% of the answerable test questions.
+- **A3.** Every help page and test question is marked as made-up, and CI fails if one isn't.
+
+**B. Answering**
+
+- **B1.** An answer cites only passages that search returned for that question.
+- **B2.** Every number in an answer appears in a cited passage; otherwise the customer gets "I don't know".
+- **B3.** A low confidence or a model answer that doesn't parse gives "I don't know" and an offer of a person, never a guess.
+- **B4.** The answer is in the customer's language.
+- **B5.** An answer never promises a refund, an outcome or a date, and never asks for a secret; code checks this in English, Tagalog and Taglish.
+- **B6.** The model receives only the question and the conversation (secrets hidden) and the passages search found, and is told that pages and customer text are information, not instructions.
+
+**C. Secrets**
+
+- **C1.** PINs and OTPs, card numbers, account numbers and passwords are hidden before anything is stored or sent, however the customer phrases them in English, Tagalog or Taglish.
+- **C2.** The customer is warned when they type a secret.
+- **C3.** No hidden secret appears in the database, the logs or any model request.
+
+**D. Hand-off**
+
+- **D1.** Asking for a person hands off.
+- **D2.** A question about the customer's own account or transaction hands off.
+- **D3.** Two "I don't know"s in one conversation hand off.
+- **D4.** A customer upset about lost money is handed off.
+- **D5.** The hand-off message never promises a time.
+
+**E. The staff views**
+
+- **E1.** The agent's list shows waiting conversations, money issues first, each with what was said so far.
+- **E2.** An agent's reply appears in the customer's chat; the agent can hand the conversation back or close it.
+- **E3.** Every hand-off, reply, hand-back and close is logged with who and when, and the log can't be changed.
+- **E4.** The owner's view counts unanswered questions by topic and hand-offs by reason, and its numbers match the stored conversations.
+
+**F. Measuring**
+
+- **F1.** The test set has about 150 made-up questions in the five groups, each with its right answer and source page.
+- **F2.** On the test set: at least 85% of answers right, at least 90% citing the right page, and 100% of own-account questions handed off; CI checks this from recorded answers, and the `eval` command runs it live.
+- **F3.** The report gives scores for keyword search alone and for combined search, with Haiku and with Sonnet.
+- **F4.** Claude's grading of answers is itself tested: made-up right and wrong answers are graded as they should be.
+
+**G. Running**
+
+- **G1.** It answers only on 127.0.0.1; the API key never appears in a page, an answer or a log.
+- **G2.** Every page says it is a demo for a made-up company, not affiliated with any real company.
