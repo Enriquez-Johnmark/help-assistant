@@ -8,6 +8,7 @@ import os
 from pathlib import Path
 
 from help_assistant.assistant import Assistant, Conversation
+from help_assistant.env import load_env
 from help_assistant.model.client import HAIKU, SONNET, ClaudeAnswerer
 from help_assistant.pages.reader import read_pages
 from help_assistant.search.combined import Searcher
@@ -43,11 +44,7 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("no passages yet: run `help-assistant index` first")
     if args.command == "ask":
         # The owner's API key, kept out of git in .env; never a Claude subscription.
-        if Path(".env").exists():
-            for line in Path(".env").read_text(encoding="utf-8").splitlines():
-                key, _, value = line.partition("=")
-                if key.strip() and not key.startswith("#") and value.strip():
-                    os.environ.setdefault(key.strip(), value.strip())
+        load_env()
         if not os.environ.get("ANTHROPIC_API_KEY"):
             parser.error("put your Anthropic API key in .env as ANTHROPIC_API_KEY")
         answerer = ClaudeAnswerer(SONNET if args.model == "sonnet" else HAIKU)
