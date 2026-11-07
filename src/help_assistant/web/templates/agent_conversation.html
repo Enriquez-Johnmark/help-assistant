@@ -5,7 +5,7 @@
 <h1>Conversation {{ id }}</h1>
 <p>Status: <span id="status">{{ status }}</span></p>
 <ol class="transcript">
-  {% for m in messages %}<li class="{{ m.sender }}"><b>{{ m.sender }}</b> <small>{{ m.at }}</small><br>{{ m.text }}</li>{% endfor %}
+  {% for m in messages %}<li class="{{ m.sender }}"><b>{{ m.sender }}</b> <small>{{ m.at|manila }}</small><br>{{ m.text }}</li>{% endfor %}
 </ol>
 <p id="new" class="error" hidden>New messages: reload the page to see them.</p>
 <form id="act" data-conversation="{{ id }}" data-count="{{ messages|length }}" data-status="{{ status }}">

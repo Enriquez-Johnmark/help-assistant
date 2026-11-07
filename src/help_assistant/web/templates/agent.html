@@ -10,7 +10,7 @@
   <p>
     {% if w.money_involved %}<span class="badge">Money</span>{% endif %}
     {{ reasons.get(w.reason, w.reason) }} ·
-    {% if w.status == "with_agent" %}with an agent{% else %}waiting{% endif %} since {{ w.waiting_since }}
+    {% if w.status == "with_agent" %}with an agent{% else %}waiting{% endif %} since {{ w.waiting_since|manila }}
   </p>
   <ol class="transcript">
     {% for m in w.messages %}<li class="{{ m.sender }}"><b>{{ m.sender }}:</b> {{ m.text }}</li>{% endfor %}

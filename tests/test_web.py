@@ -153,3 +153,14 @@ def test_g2_a_missing_page_is_a_page_with_the_demo_note() -> None:
         assert missing.status_code == 404
         assert DEMO_NOTE in missing.text
     assert web.get("/api/conversations/nope/messages").json() == {"detail": "no such conversation"}
+
+
+def test_times_are_shown_in_manila_time() -> None:
+    web = client()
+    conversation = web.post("/api/conversations").json()["id"]
+    web.post(f"/api/conversations/{conversation}/messages", json={"text": "Can I talk to a real person?"})
+    # The fixture's clock reads 02:00 UTC on 7 November 2026: 10:00 AM in Manila.
+    for path in ("/agent", f"/agent/{conversation}", "/owner"):
+        page = web.get(path).text
+        assert "7 Nov 2026, 10:00 AM" in page
+        assert "+00:00" not in page

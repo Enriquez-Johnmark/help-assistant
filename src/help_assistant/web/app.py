@@ -5,6 +5,7 @@ content owner's view, over a small JSON API. It answers only on this computer
 import logging
 import threading
 from collections.abc import Awaitable, Callable
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlsplit
@@ -52,6 +53,18 @@ class AgentText(AgentAction):
     text: str = Field(min_length=1, max_length=2000)
 
 
+MANILA = timezone(timedelta(hours=8), "Asia/Manila")
+
+
+def manila_time(stored: str | None) -> str:
+    """A stored UTC time as staff read it: "7 Nov 2026, 10:00 AM", Manila time."""
+    if not stored:
+        return ""
+    at = datetime.fromisoformat(stored).astimezone(MANILA)
+    hour = at.hour % 12 or 12
+    return f"{at.day} {at:%b %Y}, {hour}:{at:%M} {'AM' if at.hour < 12 else 'PM'}"
+
+
 def _local(host: str | None) -> bool:
     """Whether a Host header or an origin's host names this computer."""
     if not host:
@@ -62,6 +75,7 @@ def _local(host: str | None) -> bool:
 def create_app(service: ChatService) -> FastAPI:
     app = FastAPI(title="Help Assistant (demo)", docs_url=None, redoc_url=None, openapi_url=None)
     templates = Jinja2Templates(directory=HERE / "templates")
+    templates.env.filters["manila"] = manila_time  # pyright: ignore[reportUnknownMemberType]
     templates.env.globals["demo_note"] = DEMO_NOTE  # pyright: ignore[reportUnknownMemberType, reportArgumentType]
     app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
     # One request at a time touches the conversation store: a demo on one computer.
