@@ -80,3 +80,14 @@ def test_opening_the_database_again_keeps_what_is_stored(tmp_path: Path) -> None
     path = str(tmp_path / "help.db")
     save_pages(open_db(path), read_pages(Path("help_pages")))
     assert len(all_passages(open_db(path))) > 50
+
+
+def test_a1_a_help_page_that_is_gone_is_removed_with_its_passages(tmp_path: Path) -> None:
+    db = open_db(":memory:")
+    pages = read_pages(Path("help_pages"))
+    save_pages(db, pages)
+
+    saved = save_pages(db, [page for page in pages if page.slug != "send-money-fees"])
+
+    assert saved.removed == len(next(page for page in pages if page.slug == "send-money-fees").passages)
+    assert not [p for p in all_passages(db) if p.page == "send-money-fees"]
