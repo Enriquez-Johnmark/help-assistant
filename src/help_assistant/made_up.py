@@ -19,7 +19,11 @@ def not_made_up(root: Path) -> list[str]:
         for number, line in enumerate(file.read_text(encoding="utf-8").splitlines(), start=1):
             if not line.strip():
                 continue
-            record: object = json.loads(line)
+            try:
+                record: object = json.loads(line)
+            except json.JSONDecodeError:
+                problems.append(f"evalset/{file.name} line {number}: isn't valid JSON")
+                continue
             if not (isinstance(record, dict) and record.get("made_up") is True):  # pyright: ignore[reportUnknownMemberType]
                 problems.append(f"evalset/{file.name} line {number}: doesn't say it is made up")
     return problems

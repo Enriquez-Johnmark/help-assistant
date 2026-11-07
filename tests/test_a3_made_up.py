@@ -29,3 +29,10 @@ def test_a3_a_test_question_not_marked_made_up_is_found(tmp_path: Path) -> None:
         "evalset/questions.jsonl line 2: doesn't say it is made up",
         "evalset/questions.jsonl line 3: doesn't say it is made up",
     ]
+
+
+def test_a3_a_test_question_line_that_isnt_json_is_reported_not_a_crash(tmp_path: Path) -> None:
+    (tmp_path / "evalset").mkdir()
+    (tmp_path / "evalset" / "questions.jsonl").write_text('{"id": "q1", "made_up": true}\n{not json\n')
+
+    assert not_made_up(tmp_path) == ["evalset/questions.jsonl line 2: isn't valid JSON"]
