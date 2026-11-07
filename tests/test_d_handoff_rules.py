@@ -88,3 +88,8 @@ def test_the_fixed_messages_exist_in_each_language_and_promise_nothing() -> None
         assert set(messages) == {"english", "tagalog", "taglish"}
         for text in messages.values():
             assert check_rules(text) == []
+
+
+@pytest.mark.parametrize("language", ["english", "tagalog", "taglish"])
+def test_c2_the_warning_names_a_card_number_too(language: str) -> None:
+    assert "card" in SECRET_WARNING[language]  # type: ignore[index]

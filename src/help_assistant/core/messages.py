@@ -19,10 +19,10 @@ I_DONT_KNOW: dict[Language, str] = {
 }
 
 SECRET_WARNING: dict[Language, str] = {
-    "english": "For your safety, I hid the PIN, OTP, password or account number you typed. Please never share"
-    " them with anyone, including us.",
-    "tagalog": "Para sa inyong kaligtasan, itinago ko po ang PIN, OTP, password o account number na inilagay"
-    " ninyo. Huwag po ninyo itong ibigay kahit kanino, kahit sa amin.",
-    "taglish": "Para sa inyong kaligtasan, itinago ko po ang PIN, OTP, password o account number na inilagay"
-    " ninyo. Huwag po ninyo itong ibigay kahit kanino, kahit sa amin.",
+    "english": "For your safety, I hid the PIN, OTP, password, card or account number you typed."
+    " Please never share them with anyone, including us.",
+    "tagalog": "Para sa inyong kaligtasan, itinago ko po ang PIN, OTP, password, card o account number"
+    " na inilagay ninyo. Huwag po ninyo itong ibigay kahit kanino, kahit sa amin.",
+    "taglish": "Para sa inyong kaligtasan, itinago ko po ang PIN, OTP, password, card o account number"
+    " na inilagay ninyo. Huwag po ninyo itong ibigay kahit kanino, kahit sa amin.",
 }
