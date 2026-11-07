@@ -35,6 +35,24 @@ Python 3.12, managed with **uv**; **ruff** for lint and format; **pyright** in s
 6. **Two "I don't know"s** in one conversation hand off (D3). The hand-off message never promises a time (D5).
 7. **Store** the hidden messages, the passages cited and, for an "I don't know", the question and its nearest topic, for the owner's view.
 
+## Search, as measured
+
+On 25 made-up Taglish and Tagalog questions (one per help page), the right page was in the top 5:
+
+| Setting | Right page in the top 5 |
+| --- | --- |
+| Keyword search alone, plain | 17 of 25 |
+| Keyword and the local model, combined (lists 20 deep) | 19 of 25 |
+| The same with a model four times larger | 20 of 25 |
+| Adding a Tagalog glossary to keyword search | 22 of 25 |
+| The glossary, light English stemming, and lists 5 deep before combining | **24 of 25** |
+
+- **The Tagalog glossary** (`search/glossary.py`) adds the English for common Tagalog money words (padala, sangla, tubos, alahas, kuryente…) to a question's keyword search: small embedding models know few of them. It is one list for every question, matched at the start of a word or after a Tagalog prefix.
+- **Light stemming** lets "fees", "cancelling" and "arriving" match "fee", "cancel" and "arrive".
+- **Shallow lists:** combining only each search's top 5 worked better than 10 or 20, where weak matches crowded out strong ones.
+
+These were chosen on the same 25 questions, so the test set (M4), written separately, is the real measure; its report gives keyword and combined search side by side (F3).
+
 ## Database
 
 SQLite through the standard library, one file in `data/` (ignored by git), with numbered migrations.
