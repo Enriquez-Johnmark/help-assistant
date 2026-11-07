@@ -1,13 +1,19 @@
 """The commands:
 help-assistant index                 read the help pages into the database
 help-assistant search "question"     the passages a question finds
+help-assistant ask "question"        the assistant's answer to one question
+help-assistant serve                 the chat page and the staff views, on this computer
+help-assistant eval                  score the test set
 """
 
 import argparse
 import os
 from pathlib import Path
 
+import uvicorn
+
 from help_assistant.assistant import Assistant, Conversation
+from help_assistant.clock import SystemClock
 from help_assistant.env import load_env
 from help_assistant.evaluation.grader import Grade, Grader, load_grading_cases
 from help_assistant.evaluation.run import Scores, report, run, score
@@ -26,8 +32,10 @@ from help_assistant.model.client import (
 from help_assistant.pages.reader import Passage, read_pages
 from help_assistant.search.combined import Mode, Searcher
 from help_assistant.search.embeddings import FastEmbedder
+from help_assistant.service import ChatService
 from help_assistant.store.db import open_db
 from help_assistant.store.passages import all_passages, save_pages
+from help_assistant.web.app import create_app
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -44,6 +52,9 @@ def main(argv: list[str] | None = None) -> int:
     ask = commands.add_parser("ask", help="the assistant's answer to a question")
     ask.add_argument("question")
     ask.add_argument("--model", choices=["haiku", "sonnet"], default="haiku")
+    serve = commands.add_parser("serve", help="the chat page and the staff views, on this computer only")
+    serve.add_argument("--port", type=int, default=8000)
+    serve.add_argument("--model", choices=["haiku", "sonnet"], default="haiku")
     evaluate = commands.add_parser("eval", help="score the test set (F2, F3)")
     evaluate.add_argument("--record", action="store_true", help="ask Claude live and record its answers")
     evaluate.add_argument("--models", default="haiku,sonnet", help="comma-separated: haiku, sonnet")
@@ -61,12 +72,20 @@ def main(argv: list[str] | None = None) -> int:
         parser.error("no passages yet: run `help-assistant index` first")
     if args.command == "eval":
         return run_eval(parser, passages, args.record, args.models.split(","), args.modes.split(","))
-    if args.command == "ask":
+    if args.command in ("ask", "serve"):
         # The owner's API key, kept out of git in .env; never a Claude subscription.
         load_env()
         if not os.environ.get("ANTHROPIC_API_KEY"):
             parser.error("put your Anthropic API key in .env as ANTHROPIC_API_KEY")
-        answerer = ClaudeAnswerer(SONNET if args.model == "sonnet" else HAIKU)
+    if args.command == "serve":
+        assistant = Assistant(Searcher(passages, FastEmbedder()), ClaudeAnswerer(MODELS[args.model]))
+        app = create_app(ChatService(db, SystemClock(), assistant))
+        print(f"Chat: http://127.0.0.1:{args.port}/   Agents: /agent   Help content: /owner")
+        # 127.0.0.1 only: the demo is never reachable from another computer (G1).
+        uvicorn.run(app, host="127.0.0.1", port=args.port, log_level="warning")
+        return 0
+    if args.command == "ask":
+        answerer = ClaudeAnswerer(MODELS[args.model])
         reply = Assistant(Searcher(passages, FastEmbedder()), answerer).respond(Conversation(), args.question)
         print(reply.text)
         if reply.cited:
