@@ -17,3 +17,5 @@ jobs:
       - run: uv run ruff check .
       - run: uv run pyright
       - run: uv run pytest
+      # A3: every help page and test question says it is made up.
+      - run: uv run check-made-up

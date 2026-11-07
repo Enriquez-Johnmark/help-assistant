@@ -24,6 +24,7 @@ dev = [
 
 [project.scripts]
 help-assistant = "help_assistant.cli:main"
+check-made-up = "help_assistant.made_up:main"
 
 [tool.ruff]
 line-length = 110
