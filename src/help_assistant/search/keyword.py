@@ -15,13 +15,14 @@ def words(text: str) -> list[str]:
 
 
 def stem(word: str) -> str:
-    """A light English stem, so "schools" finds "school" and "cancelling" finds
-    "cancel". Short words are left alone."""
+    """A light English stem, so "schools" finds "school", "cancelling" finds
+    "cancel" and "arriving" finds "arrive". Short words are left alone."""
     for ending in ("ling", "ing", "ies", "es", "ed", "s"):
         if len(word) > len(ending) + 3 and word.endswith(ending):
             word = word[: -len(ending)]
             return word + "y" if ending == "ies" else word
-    return word
+    # "arrive" and "arriv(ing)" meet at "arriv".
+    return word[:-1] if len(word) > 4 and word.endswith("e") else word
 
 
 def terms(text: str) -> list[str]:
