@@ -90,6 +90,11 @@ Behind an interface with two versions:
 
 `eval` runs the test set (`evalset/questions.jsonl`) through the same steps as the chat, with each search mode and each model (F3), and reports right answers, right pages, "I don't know"s, hand-offs and refusals by group. **Grading:** code checks citations, numbers, hand-offs and refusals; Claude Sonnet grades whether a reply matches the right answer, as a strict type (`correct`, `reason`); the grader is tested on made-up right and wrong replies (F4). Recorded answers are committed, so CI checks the targets (F2) without a key.
 
+## The evaluation, as built
+
+- **Search on the test set** (without a key): combined search finds the right page in the top 5 for 37 of the 40 Tagalog and Taglish questions (92%) and 59 of the 60 English ones; keyword search alone, 39 of 40 and 59 of 60. A2 is checked on these questions, which search wasn't tuned on.
+- **Recordings:** `evalset/recorded/answers.json` (both models, both searches, keyed by the exact request) and `grades.json` (Claude Sonnet's grades, the 20 grading cases included). Recording again reuses what is there. A replay fails, with a message saying to re-record, if the prompt, the questions, the pages or the passages found changed.
+
 ## Time and privacy
 
 Time is read only through an injected clock. The server listens on 127.0.0.1 only and answers only requests addressed to it (G1). The API key lives in `.env` and is never in a page, an answer or a log; the model client's errors are reported by kind and status only.
