@@ -1,11 +1,11 @@
 """Hiding secrets and personal details in what a customer types, before
 anything is stored or sent to the model (C1, C2). The only way to make a
-`Redacted` text is `redact`, so the store and the model client, which take only
-`Redacted`, can't be handed a customer's words that skipped it (C3)."""
+`Redacted` text is `redact`, so the store and the model client, which accept
+only `Redacted`, can't be handed a customer's words that skipped it (C3)."""
 
 import re
 from dataclasses import dataclass
-from typing import Literal, NewType
+from typing import Literal
 
 Kind = Literal["pin_or_otp", "card_number", "account_number", "password", "mobile_number", "email"]
 
@@ -22,7 +22,19 @@ LABELS: dict[Kind, str] = {
     "email": "[email hidden]",
 }
 
-Redacted = NewType("Redacted", str)
+_TOKEN = object()
+
+
+class Redacted(str):
+    """Text that has been through `redact`. Made only there: the store and the
+    model client check for it, so a customer's raw words can't reach them (C3)."""
+
+    __slots__ = ()
+
+    def __new__(cls, value: str, *, _token: object = None) -> "Redacted":
+        if _token is not _TOKEN:
+            raise TypeError("Redacted text comes only from redact()")
+        return super().__new__(cls, value)
 
 
 @dataclass(frozen=True)
@@ -86,8 +98,8 @@ def redact(text: str) -> Redaction:
 
     text = _DIGIT_RUN.sub(digit_run, text)
     if _ONLY_A_CODE.match(text):
-        return Redaction(Redacted(hide("pin_or_otp")), found)
+        return Redaction(Redacted(hide("pin_or_otp"), _token=_TOKEN), found)
     for pattern in (_CODE_AFTER_WORD, _CODE_BEFORE_WORD):
         text = pattern.sub(lambda m: m.group().replace(m.group(1), hide("pin_or_otp")), text)
     text = _PASSWORD.sub(lambda m: m.group().replace(m.group(1), hide("password")), text)
-    return Redaction(Redacted(text), found)
+    return Redaction(Redacted(text, _token=_TOKEN), found)
