@@ -16,6 +16,9 @@ from help_assistant.search.combined import Mode, Searcher
 Kind = Literal["answer", "i_dont_know", "handoff", "with_person"]
 Turn = tuple[Literal["customer", "assistant"], Redacted | str]
 
+# How many earlier turns the model sees with each question.
+HISTORY_TURNS = 6
+
 
 @dataclass
 class Conversation:
@@ -86,7 +89,9 @@ class Assistant:
             return self._hand_off(conversation, reason, language)
         # 3. Search; 4. ask the model with only the hidden text and the passages (B6).
         found = [hit.passage for hit in self._searcher.search(question, 5, mode=self._mode)]
-        request = build_request(self._answerer.model, history, question, found, language)
+        # The last few turns are enough context; sending all of a long chat would
+        # grow every request, and its cost, without limit.
+        request = build_request(self._answerer.model, history[-HISTORY_TURNS:], question, found, language)
         parsed = parse_answer(self._answerer.answer(request))
         # 5. Check the answer in code (B1 to B5): any failure is "I don't know" (B3).
         if parsed is None:

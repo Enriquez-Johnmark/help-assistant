@@ -137,3 +137,13 @@ def test_c2_a_customer_waiting_for_a_person_is_still_warned_about_a_secret() -> 
     later = helper.respond(conversation, "my pin is 482913 by the way")
     assert later.kind == "with_person"
     assert later.text == SECRET_WARNING["english"]
+
+
+def test_only_the_last_turns_of_a_long_conversation_are_sent() -> None:
+    fake = FakeAnswerer(lambda _: answer("Branches open at 8:00 a.m.", ["branch-hours#opening-hours"]))
+    helper = assistant(fake)
+    conversation = Conversation()
+    for _ in range(10):
+        helper.respond(conversation, "When do branches open?")
+    # Six earlier turns at most, then the new question with its passages.
+    assert len(fake.seen[-1].messages) <= 7
