@@ -21,7 +21,11 @@ async function call(method, url, body) {
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await response.json().catch(() => ({}));
-  if (!response.ok) throw new Error(typeof data.detail === "string" ? data.detail : "Please try again.");
+  if (!response.ok) {
+    const error = new Error(typeof data.detail === "string" ? data.detail : "Please try again.");
+    error.status = response.status;
+    throw error;
+  }
   return data;
 }
 
@@ -70,8 +74,10 @@ async function refresh() {
   if (!conversation) return;
   try {
     render(await call("GET", `/api/conversations/${conversation}/messages`));
-  } catch {
-    await start();
+  } catch (error) {
+    // Only a conversation the server doesn't know starts afresh; a network
+    // blip or a restart keeps the chat, and the next check picks it up again.
+    if (error.status === 400) await start();
   }
 }
 

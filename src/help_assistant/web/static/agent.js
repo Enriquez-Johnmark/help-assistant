@@ -42,3 +42,15 @@ form.addEventListener("submit", (event) => {
 form.querySelectorAll("button[type=button]").forEach((button) =>
   button.addEventListener("click", () => act(button.dataset.action)),
 );
+
+// New messages from the customer: reload to show them, unless a reply is being typed.
+const notice = document.getElementById("new");
+let count = Number(form.dataset.count);
+setInterval(async () => {
+  const response = await fetch(`/api/conversations/${conversation}/messages`).catch(() => null);
+  if (!response?.ok) return;
+  const data = await response.json();
+  if (data.messages.length === count && data.status === form.dataset.status) return;
+  if (!reply.value.trim()) location.reload();
+  else notice.hidden = false;
+}, 4000);

@@ -7,7 +7,8 @@
 <ol class="transcript">
   {% for m in messages %}<li class="{{ m.sender }}"><b>{{ m.sender }}</b> <small>{{ m.at }}</small><br>{{ m.text }}</li>{% endfor %}
 </ol>
-<form id="act" data-conversation="{{ id }}">
+<p id="new" class="error" hidden>New messages: reload the page to see them.</p>
+<form id="act" data-conversation="{{ id }}" data-count="{{ messages|length }}" data-status="{{ status }}">
   <label>Your name <input id="by" maxlength="60" required autocomplete="name"></label>
   <label>Reply <textarea id="reply" rows="3" maxlength="2000"></textarea></label>
   <p>
