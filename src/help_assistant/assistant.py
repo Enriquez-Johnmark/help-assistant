@@ -1,6 +1,6 @@
 """Answering one customer message: every step in architecture.md, in order."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass, field, replace
 from typing import Literal
 
 from help_assistant.core.checks import Broken, check_citations, check_numbers, check_rules
@@ -8,9 +8,10 @@ from help_assistant.core.handoff import Reason, handoff_reason
 from help_assistant.core.language import Language, check_language, language_of
 from help_assistant.core.messages import HANDOFF, I_DONT_KNOW, SECRET_WARNING
 from help_assistant.core.secrets import Redacted, redact
-from help_assistant.model.answer import parse_answer
+from help_assistant.model.answer import ModelAnswer, parse_answer
 from help_assistant.model.client import Answerer
 from help_assistant.model.request import build_request
+from help_assistant.pages.reader import Passage
 from help_assistant.search.combined import Mode, Searcher
 
 Kind = Literal["answer", "i_dont_know", "handoff", "with_person"]
@@ -38,6 +39,8 @@ class Reply:
     reason: Reason | None = None
     warned: bool = False
     broken: list[Broken] = field(default_factory=lambda: list[Broken]())
+    # The page search found first, for the owner's view of unanswered topics.
+    nearest_page: str | None = None
 
 
 class Assistant:
@@ -93,6 +96,18 @@ class Assistant:
         # grow every request, and its cost, without limit.
         request = build_request(self._answerer.model, history[-HISTORY_TURNS:], question, found, language)
         parsed = parse_answer(self._answerer.answer(request))
+        nearest = found[0].page if found else None
+        reply = self._checked(conversation, parsed, found, question, language)
+        return replace(reply, nearest_page=nearest)
+
+    def _checked(
+        self,
+        conversation: Conversation,
+        parsed: ModelAnswer | None,
+        found: list[Passage],
+        question: Redacted,
+        language: Language,
+    ) -> Reply:
         # 5. Check the answer in code (B1 to B5): any failure is "I don't know" (B3).
         if parsed is None:
             return self._i_dont_know(

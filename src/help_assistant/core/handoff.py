@@ -77,3 +77,14 @@ def handoff_reason(message: str) -> Reason | None:
     if _OWN.search(message) and _CASE.search(message) and not _GENERAL.search(message):
         return "own_account"
     return None
+
+
+_MONEY_MENTION = _any(
+    r"\b(?:money|pera|balance|funds|cash|padala|transfer|remittance|refund|bayad|charged|deducted|nabawasan)\b",
+    r"₱\s?\d",
+)
+
+
+def mentions_money(text: str) -> bool:
+    """Whether a message is about money, so the agent's list puts it first (E1)."""
+    return bool(_MONEY_MENTION.search(text))

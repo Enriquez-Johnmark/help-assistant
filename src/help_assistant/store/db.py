@@ -17,6 +17,47 @@ MIGRATIONS: tuple[str, ...] = (
       position integer not null
     );
     """,
+    # Conversations and their messages, secrets already hidden (C3); questions
+    # the assistant couldn't answer, for the owner (E4); and the audit log of
+    # what people and the assistant did, append-only (E3).
+    """
+    create table conversations (
+      id text primary key,
+      status text not null check (status in ('assistant', 'waiting', 'with_agent', 'closed')),
+      handoff_reason text,
+      money_involved integer not null default 0 check (money_involved in (0, 1)),
+      language text,
+      i_dont_knows integer not null default 0,
+      started_at text not null,
+      waiting_since text
+    );
+    create table messages (
+      id integer primary key autoincrement,
+      conversation_id text not null references conversations (id) on delete cascade,
+      at text not null,
+      sender text not null check (sender in ('customer', 'assistant', 'agent')),
+      text text not null
+    );
+    create table unanswered (
+      id integer primary key autoincrement,
+      conversation_id text not null references conversations (id) on delete cascade,
+      at text not null,
+      question text not null,
+      topic text not null
+    );
+    create table audit_log (
+      id integer primary key autoincrement,
+      at text not null,
+      actor text not null,
+      action text not null,
+      conversation_id text not null,
+      details text not null default '{}'
+    );
+    create trigger audit_log_no_update before update on audit_log
+      begin select raise(abort, 'the audit log is append-only'); end;
+    create trigger audit_log_no_delete before delete on audit_log
+      begin select raise(abort, 'the audit log is append-only'); end;
+    """,
 )
 
 
