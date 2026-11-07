@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Help content{% endblock %}
+{% block main %}
+<h1>What the help pages are missing</h1>
+<h2>Unanswered questions, by topic</h2>
+{% if view.unanswered_by_topic %}
+<table><tr><th>Topic</th><th>Questions</th></tr>
+{% for topic, count in view.unanswered_by_topic.items()|sort(attribute="1", reverse=True) %}<tr><td>{{ topic }}</td><td>{{ count }}</td></tr>{% endfor %}
+</table>
+{% else %}<p>None yet.</p>{% endif %}
+<h2>Hand-offs, by reason</h2>
+{% if view.handoffs_by_reason %}
+<table><tr><th>Reason</th><th>Hand-offs</th></tr>
+{% for reason, count in view.handoffs_by_reason.items()|sort(attribute="1", reverse=True) %}<tr><td>{{ reasons.get(reason, reason) }}</td><td>{{ count }}</td></tr>{% endfor %}
+</table>
+{% else %}<p>None yet.</p>{% endif %}
+<h2>Audit log</h2>
+{% if log %}
+<table><tr><th>When</th><th>Who</th><th>What</th><th>Conversation</th></tr>
+{% for e in log|reverse %}<tr><td>{{ e.at }}</td><td>{{ e.actor }}</td><td>{{ e.action }}</td><td><a href="/agent/{{ e.conversation_id }}">{{ e.conversation_id[:8] }}</a></td></tr>{% endfor %}
+</table>
+{% else %}<p>Nothing logged yet.</p>{% endif %}
+{% endblock %}

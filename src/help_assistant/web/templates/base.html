@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Help{% endblock %} · Halimbawa Money (demo)</title>
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <header>
+    <strong>Halimbawa Money Help</strong>
+    <nav><a href="/">Chat</a> <a href="/agent">Agents</a> <a href="/owner">Help content</a></nav>
+  </header>
+  <main>{% block main %}{% endblock %}</main>
+  <footer>{{ demo_note }}</footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

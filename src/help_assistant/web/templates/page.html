@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block title %}{{ title }}{% endblock %}
+{% block main %}
+<article class="help-page">
+  <p><a href="/">← Back to the chat</a></p>
+  <h1>{{ title }}</h1>
+  {% for section in sections %}
+  <section id="{{ section.anchor }}">
+    <h2>{{ section.heading }}</h2>
+    <p class="text">{{ section.text }}</p>
+  </section>
+  {% endfor %}
+</article>
+{% endblock %}

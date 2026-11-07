@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Chat{% endblock %}
+{% block main %}
+<section class="chat">
+  <h1>Ask us anything</h1>
+  <p class="hint">Answers come from our help pages, in English, Tagalog or Taglish. Never type your PIN, OTP, password or card number.</p>
+  <ol id="messages" aria-live="polite"></ol>
+  <p id="status" class="status"></p>
+  <form id="ask">
+    <label for="text" class="visually-hidden">Your question</label>
+    <textarea id="text" rows="2" maxlength="2000" placeholder="Type your question…" required></textarea>
+    <button type="submit">Send</button>
+  </form>
+  <p><button type="button" id="restart" class="link">Start a new chat</button></p>
+</section>
+{% endblock %}
+{% block scripts %}<script src="/static/chat.js"></script>{% endblock %}

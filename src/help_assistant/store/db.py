@@ -68,7 +68,9 @@ MIGRATIONS: tuple[str, ...] = (
 
 def open_db(path: str) -> sqlite3.Connection:
     """Opens the database at `path` (":memory:" for tests) and brings its schema up to date."""
-    db = sqlite3.connect(path, isolation_level=None)
+    # The web server answers on a pool of threads; it serialises every use of
+    # the connection with one lock, so sharing it between threads is safe.
+    db = sqlite3.connect(path, isolation_level=None, check_same_thread=False)
     db.row_factory = sqlite3.Row
     db.execute("pragma foreign_keys = on")
     db.execute("create table if not exists schema_migrations (version integer primary key)")

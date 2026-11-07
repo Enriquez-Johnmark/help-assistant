@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block title %}Agents{% endblock %}
+{% block main %}
+<h1>Waiting for a person</h1>
+<p class="hint">Money issues first, then the longest waiting. Secrets are already hidden.</p>
+{% if not waiting %}<p>No one is waiting.</p>{% endif %}
+{% for w in waiting %}
+<article class="waiting{% if w.money_involved %} money{% endif %}">
+  <h2><a href="/agent/{{ w.id }}">Conversation {{ w.id }}</a></h2>
+  <p>
+    {% if w.money_involved %}<span class="badge">Money</span>{% endif %}
+    {{ reasons.get(w.reason, w.reason) }} ·
+    {% if w.status == "with_agent" %}with an agent{% else %}waiting{% endif %} since {{ w.waiting_since }}
+  </p>
+  <ol class="transcript">
+    {% for m in w.messages %}<li class="{{ m.sender }}"><b>{{ m.sender }}:</b> {{ m.text }}</li>{% endfor %}
+  </ol>
+</article>
+{% endfor %}
+{% endblock %}

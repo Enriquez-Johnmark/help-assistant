@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Conversation{% endblock %}
+{% block main %}
+<p><a href="/agent">← All waiting</a></p>
+<h1>Conversation {{ id }}</h1>
+<p>Status: <span id="status">{{ status }}</span></p>
+<ol class="transcript">
+  {% for m in messages %}<li class="{{ m.sender }}"><b>{{ m.sender }}</b> <small>{{ m.at }}</small><br>{{ m.text }}</li>{% endfor %}
+</ol>
+<form id="act" data-conversation="{{ id }}">
+  <label>Your name <input id="by" maxlength="60" required autocomplete="name"></label>
+  <label>Reply <textarea id="reply" rows="3" maxlength="2000"></textarea></label>
+  <p>
+    <button type="submit" data-action="reply">Send reply</button>
+    <button type="button" data-action="hand-back">Hand back to the assistant</button>
+    <button type="button" data-action="close">Close</button>
+  </p>
+  <p id="error" class="error" role="alert"></p>
+</form>
+{% endblock %}
+{% block scripts %}<script src="/static/agent.js"></script>{% endblock %}
