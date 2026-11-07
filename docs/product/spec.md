@@ -95,7 +95,7 @@ Each has a test whose name starts with its ID.
 **B. Answering**
 
 - **B1.** An answer cites only passages that search returned for that question.
-- **B2.** Every number in an answer appears in a cited passage; otherwise the customer gets "I don't know".
+- **B2.** Every number in an answer appears in a cited passage or in the customer's own question; otherwise the customer gets "I don't know". (The question's figures were allowed on 2026-11-07, so "sending ₱3,000 costs ₱35" can be said.)
 - **B3.** A low confidence or a model answer that doesn't parse gives "I don't know" and an offer of a person, never a guess.
 - **B4.** The answer is in the customer's language.
 - **B5.** An answer never promises a refund, an outcome or a date, and never asks for a secret; code checks this in English, Tagalog and Taglish.
