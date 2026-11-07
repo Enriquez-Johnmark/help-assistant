@@ -50,6 +50,9 @@ def test_b5_asking_for_a_secret_is_caught(reply: str) -> None:
         "Huwag po ninyong ibigay ang inyong PIN o OTP kahit kanino.",
         "A person in support will look into your transfer; have the reference number ready.",
         "Pwede po kayong mag-renew ng sangla sa app gamit ang ticket number.",
+        "Tell support if your OTP still doesn't arrive after 2 minutes.",
+        "Open the app and confirm with your 6-digit PIN.",
+        "Send the reference number to the receiver; they don't need your PIN.",
     ],
 )
 def test_b5_quoting_policy_and_warning_about_secrets_pass(reply: str) -> None:

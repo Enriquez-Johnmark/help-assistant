@@ -87,27 +87,31 @@ _PROMISES: tuple[re.Pattern[str], ...] = tuple(
     )
 )
 
-_SECRET = re.compile(
-    r"\b(?:account (?:number|no)|card (?:number|no)|m?pin|otp|one[- ]time (?:pin|password|code)"
+_SENSITIVE = (  # what a reply must never ask for
+    r"(?:account (?:number|no)|card (?:number|no)|m?pin|otp|one[- ]time (?:pin|password|code)"
     r"|password|passcode|cvv)\b"
 )
-# Asking for something to be given to us, not telling the customer to use their
-# own PIN in the app ("confirm with your PIN" is how the app works).
-_REQUEST = re.compile(
-    r"\b(?:send|give|share|provide|tell|reply with|dm|forward|message us|ibigay|bigay|ipadala|i-?send"
-    r"|i-?share|sabihin|paki-?\w*)\b"
+# Asking for a secret means a request whose object is the secret: "send me your
+# PIN", "reply with your OTP", "pakibigay po ang inyong account number". Only
+# small words may stand between them, so "tell support if your OTP doesn't
+# arrive" and "confirm with your PIN" (how the app works) pass.
+_VERB = (
+    r"(?:send|give|share|provide|tell|reply with|dm|forward|ibigay|bigay|ipadala|i-?send|i-?share"
+    r"|sabihin|paki-?\w+)"
 )
+_FILLER = (
+    r"(?:(?:me|us|it|please|po|ang|ng|yung|ang inyong|inyong|iyong|your|the|mo|ninyo|sa|amin|akin|namin)\s+)"
+)
+_REQUEST_FOR_SECRET = re.compile(rf"\b{_VERB}\s+{_FILLER}{{0,4}}{_SENSITIVE}")
 _NEGATION = {"never", "don't", "dont", "not", "huwag", "wag", "hindi", "kailanman"}
 _SENTENCE = re.compile(r"(?<=[.!?])\s+|\n+")
 _CLAUSE = re.compile(r"[,;:]")
 
 
 def _asks_for_secret(sentence: str) -> bool:
-    """A sentence names a secret and has a request that isn't negated just
-    before it, within its own clause ("never share your PIN" passes)."""
-    if not _SECRET.search(sentence):
-        return False
-    for request in _REQUEST.finditer(sentence):
+    """A sentence asks for a secret when it requests one and the request isn't
+    negated just before it, within its own clause ("never share your PIN")."""
+    for request in _REQUEST_FOR_SECRET.finditer(sentence):
         clause = _CLAUSE.split(sentence[: request.start()])[-1]
         if not set(re.findall(r"[a-z']+", clause)[-3:]) & _NEGATION:
             return True
