@@ -6,7 +6,7 @@ import pytest
 from help_assistant.evaluation.grader import Grader
 from help_assistant.evaluation.run import report, run, score
 from help_assistant.evaluation.testset import load_questions
-from help_assistant.model.client import HAIKU, SONNET, RecordedAnswerer, load_recordings
+from help_assistant.model.client import HAIKU, SONNET, NotRecordedError, RecordedAnswerer, load_recordings
 from help_assistant.pages.reader import read_pages
 from help_assistant.search.combined import Searcher
 from help_assistant.search.embeddings import FastEmbedder
@@ -79,8 +79,19 @@ def test_f3_the_report_has_a_row_for_each_model_and_search_mode() -> None:
 def test_f2_the_recorded_answers_meet_the_targets() -> None:
     recordings = load_recordings(ANSWERS)
     grader = Grader(RecordedAnswerer(load_recordings(GRADES), SONNET))
-    results = run(
-        QUESTIONS, Searcher(PASSAGES, FastEmbedder()), RecordedAnswerer(recordings, HAIKU), grader, "combined"
-    )
+    try:
+        results = run(
+            QUESTIONS,
+            Searcher(PASSAGES, FastEmbedder()),
+            RecordedAnswerer(recordings, HAIKU),
+            grader,
+            "combined",
+        )
+    except NotRecordedError:
+        pytest.fail(
+            "a request isn't recorded: the prompt, the test set, the help pages or the passages search finds"
+            " (which depend on the embedding model) changed since recording;"
+            " run `help-assistant eval --record`"
+        )
     scores = score(results)
     assert scores.meets_targets(), scores
