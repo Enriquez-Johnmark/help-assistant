@@ -66,10 +66,22 @@ def read_page(file: Path) -> HelpPage:
     except ValidationError as error:
         raise ValueError(f"{file.name}: {error}") from error
     slug = file.stem
+    intro, *sections = re.split(r"^## ", body, flags=re.M)
+    # Before the first section only the title and the made-up note may stand:
+    # anything else would never be found, so it is refused rather than dropped.
+    stray = [line for line in intro.splitlines() if line.strip() and not line.startswith(("# ", "> "))]
+    if stray:
+        raise ValueError(f"{file.name} has text outside a section: {stray[0][:60]!r}")
+    if not sections:
+        raise ValueError(f"{file.name} has no sections (## headings), so nothing in it could be found")
     passages: list[Passage] = []
-    for position, section in enumerate(re.split(r"^## ", body, flags=re.M)[1:]):
+    seen: set[str] = set()
+    for position, section in enumerate(sections):
         heading, _, content = section.partition("\n")
         heading = heading.strip()
+        if _slug(heading) in seen:
+            raise ValueError(f"{file.name} has two sections headed {heading!r}")
+        seen.add(_slug(heading))
         passages.append(
             Passage(
                 id=f"{slug}#{_slug(heading)}",

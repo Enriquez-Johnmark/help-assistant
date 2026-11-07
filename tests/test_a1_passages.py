@@ -91,3 +91,22 @@ def test_a1_a_help_page_that_is_gone_is_removed_with_its_passages(tmp_path: Path
 
     assert saved.removed == len(next(page for page in pages if page.slug == "send-money-fees").passages)
     assert not [p for p in all_passages(db) if p.page == "send-money-fees"]
+
+
+def test_a1_a_page_with_two_sections_of_the_same_heading_is_refused(tmp_path: Path) -> None:
+    file = tmp_path / "fees.md"
+    file.write_text(PAGE + "\n## Fees for branch pickup\nAgain.\n")
+    with pytest.raises(ValueError, match="two sections headed"):
+        read_page(file)
+
+
+def test_a1_text_outside_any_section_is_refused_not_dropped(tmp_path: Path) -> None:
+    file = tmp_path / "fees.md"
+    file.write_text(
+        PAGE.replace("> Made up for a demo.\n", "> Made up for a demo.\n\nAll fees are in pesos.\n")
+    )
+    with pytest.raises(ValueError, match="outside a section"):
+        read_page(file)
+    file.write_text(PAGE.split("## Fees")[0])
+    with pytest.raises(ValueError, match="no sections"):
+        read_page(file)
