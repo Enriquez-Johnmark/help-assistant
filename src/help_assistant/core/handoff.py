@@ -23,14 +23,25 @@ _ASKS_FOR_PERSON = _any(
     r"\bpakausap\b",
 )
 
-# D4: lost money, with anger or a loss.
-_MONEY = _any(
-    r"\b(?:money|pera|balance|funds|cash|ipon|savings)\b", r"₱\s?\d", r"\b\d{1,3}(?:,\d{3})+\b", r"\b\d{4,}\b"
+# D4: money that is lost or stolen: a loss word close to a money word ("nawala
+# ang pera", "stole money", "my money is gone"), so "I lost my pawn ticket for my
+# 5000 loan" or "is this a scam?" are answered from the pages.
+_MONEY_WORD = re.compile(
+    r"^(?:money|pera|balance|funds|cash|ipon|savings|₱?\d{1,3}(?:,\d{3})+|₱?\d{4,}|₱\d+)$"
 )
-_LOSS = _any(
-    r"\b(?:stole|stolen|steal|lost|missing|gone|scam\w*|hack\w*)\b",
-    r"\b(?:nawala|nawawala|ninakaw|nanakaw|naloko|na-?scam|na-?hack)\b",
+_LOSS_WORD = re.compile(
+    r"^(?:stole|stolen|steal|lost|missing|gone|scam\w*|hack\w*|nawala|nawawala|ninakaw|nanakaw|naloko"
+    r"|na-?scam|na-?hack)$"
 )
+_NEAR = 3
+
+
+def _lost_money(message: str) -> bool:
+    tokens = [t.strip(",") for t in re.findall(r"[\w₱,'-]+", message.lower())]
+    money = [i for i, t in enumerate(tokens) if _MONEY_WORD.match(t)]
+    loss = [i for i, t in enumerate(tokens) if _LOSS_WORD.match(t)]
+    return any(abs(i - j) <= _NEAR for i in money for j in loss)
+
 
 # D2: the customer's own account or transaction, with something only a person
 # can look up: a reference, a date, a status, a charge, a hold.
@@ -39,6 +50,13 @@ _OWN = _any(
     r"\b(?:transfer|transaction|padala|bayad|wallet|account|balance|pera|remittance)\s+ko\b",
     r"\b(?:pinadala|ipinadala|binayad|sinend|na-?send)\s+ko\b",
     r"\bwas\s+i\s+charged\b",
+)
+# "What do I do if my wallet is locked?" asks how things work, not about one case.
+_GENERAL = _any(
+    r"^\s*(?:what|how)\b[^?]*\bif\b",
+    r"\bwhat\s+happens\s+if\b",
+    r"\bpaano\s+(?:po\s+)?kung\b",
+    r"\bano\s+(?:po\s+)?(?:ang\s+)?(?:gagawin|mangyayari)\s+(?:ko\s+)?kung\b",
 )
 _CASE = _any(
     r"\b(?=[A-Z0-9]*\d)(?=[A-Z0-9]*[A-Z])[A-Z0-9]{10}\b",
@@ -54,8 +72,8 @@ def handoff_reason(message: str) -> Reason | None:
     Ordinary questions ("how do I verify my account?") are answered."""
     if _ASKS_FOR_PERSON.search(message):
         return "asked_for_person"
-    if _MONEY.search(message) and _LOSS.search(message):
+    if _lost_money(message):
         return "lost_money"
-    if _OWN.search(message) and _CASE.search(message):
+    if _OWN.search(message) and _CASE.search(message) and not _GENERAL.search(message):
         return "own_account"
     return None

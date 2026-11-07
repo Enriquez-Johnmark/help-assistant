@@ -61,6 +61,10 @@ def test_d4_a_customer_upset_about_lost_money_hands_off(message: str) -> None:
         "Paano i-cancel ang padala na hindi pa nakukuha?",
         "What happens if I lose my pawn ticket?",
         "Is it safe to share my PIN with someone who says they're from you?",
+        "I lost my pawn ticket for my 5000 loan, what do I do?",
+        "What should I do if my wallet is locked?",
+        "Paano kung na-hold ang account ko?",
+        "May nagtext na nanalo daw ako, scam ba ito?",
     ],
 )
 def test_d_ordinary_questions_are_answered_not_handed_off(message: str) -> None:
