@@ -80,7 +80,10 @@ _PROMISES: tuple[re.Pattern[str], ...] = tuple(
         r"(?:refund|reimburse|return|reverse|credit|restore|fix|resolve|send back|make sure)",
         r"\byou(?:'ll| will)\s+(?:\w+\s+){0,2}?(?:get|receive|have)\s+"
         r"(?:\w+\s+){0,3}?(?:refund|money|cash|funds)\b",
-        r"\byour\s+(?:money|refund|transfer|item|fee|cash|balance)\s+will\s+(?:be|arrive|come)\b",
+        # An outcome for their case, not a process ("will be checked" passes).
+        r"\byour\s+(?:money|refund|transfer|item|fee|cash|balance|concern|case)\s+will\s+(?:be\s+)?"
+        r"(?:refunded|returned|reversed|credited|restored|released|fixed|resolved|approved"
+        r"|arrive|come back)\b",
         r"\b(?:i|we)\s+(?:promise|guarantee|assure)\b|\bguaranteed?\b",
         r"\b(?:ibabalik|ire-?refund|aayusin)\s+(?:po\s+)?namin\b",
         r"\b(?:sigurado\w*|pangako|ipinapangako|makakaasa|garantisado)\b",
