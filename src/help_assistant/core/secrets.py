@@ -100,16 +100,16 @@ def redact(text: str) -> Redaction:
         digits = re.sub(r"\D", "", match.group())
         grouped = match.group() != digits
         # A card number passes the Luhn check and is 16 digits, grouped, or
-        # named as a card; any other long number is taken as an account number.
+        # named as a card.
         if (
             13 <= len(digits) <= 19
             and _luhn(digits)
             and (len(digits) == 16 or grouped or _CARD_WORDS.search(text))
         ):
             return hide("card_number")
-        if not grouped and 10 <= len(digits) <= 16:
-            return hide("account_number")
-        return match.group()
+        # Ten digits or more, together or in groups, is an account number: an
+        # amount is written with commas, and a date or a time is shorter.
+        return hide("account_number")
 
     text = _DIGIT_RUN.sub(digit_run, text)
     if _ONLY_A_CODE.match(text):

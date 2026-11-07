@@ -17,6 +17,8 @@ CASES: list[tuple[str, str, list[str]]] = [
     ("my card 5500-0000-0000-0004 was declined", "5500-0000-0000-0004", ["card_number"]),
     ("Account number ko 0012345678901 sa bank", "0012345678901", ["account_number"]),
     ("acct no. 12345678901234 please check", "12345678901234", ["account_number"]),
+    ("Account number ko 0012-3456-7890", "0012-3456-7890", ["account_number"]),
+    ("my bank account 1234 5678 9012 3", "1234 5678 9012 3", ["account_number"]),
     ("My password is Juan@2026 and it doesn't work", "Juan@2026", ["password"]),
     ("password ko ay mahalpusa99", "mahalpusa99", ["password"]),
     ("password ko mahalpusa99 pero ayaw", "mahalpusa99", ["password"]),
@@ -35,6 +37,7 @@ KEPT = [
     "My reference number is HM4K2P9Q7X",
     "I sent it 3 days ago at 2 pm",
     "My password reset doesn't work",
+    "I sent it on 2026-11-03 at 10:15",
     "Paano palitan ang password ko?",
 ]
 
