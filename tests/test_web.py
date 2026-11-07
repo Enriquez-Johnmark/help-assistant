@@ -137,3 +137,19 @@ def test_what_a_customer_types_is_shown_as_text_not_run_as_html() -> None:
         page = web.get(path).text
         assert "<script>alert(1)" not in page
         assert "&lt;script&gt;alert(1)" in page
+
+
+def test_changes_from_another_program_on_this_computer_are_refused() -> None:
+    web = client()
+    other_port = web.post("/api/conversations", headers={"origin": "http://localhost:3000"})
+    assert other_port.status_code == 403
+    assert web.post("/api/conversations", headers={"origin": "http://127.0.0.1:8000"}).status_code == 200
+
+
+def test_g2_a_missing_page_is_a_page_with_the_demo_note() -> None:
+    web = client()
+    for path in ("/agent/no-such-conversation", "/pages/no-such-page"):
+        missing = web.get(path)
+        assert missing.status_code == 404
+        assert DEMO_NOTE in missing.text
+    assert web.get("/api/conversations/nope/messages").json() == {"detail": "no such conversation"}

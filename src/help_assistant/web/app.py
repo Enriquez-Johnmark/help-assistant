@@ -15,6 +15,7 @@ from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel, ConfigDict, Field
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from help_assistant.service import ChatService, Message
 
@@ -65,7 +66,6 @@ def create_app(service: ChatService) -> FastAPI:
     app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
     # One request at a time touches the conversation store: a demo on one computer.
     lock = threading.Lock()
-    titles: dict[str, str] = {row["slug"]: row["title"] for row in service.db.execute("select * from pages")}
 
     @app.middleware("http")
     async def only_this_computer(  # pyright: ignore[reportUnusedFunction]
@@ -76,7 +76,8 @@ def create_app(service: ChatService) -> FastAPI:
         changes = request.method not in ("GET", "HEAD")
         origin = request.headers.get("origin")
         if changes and (
-            (origin is not None and not _local(urlsplit(origin).netloc))
+            # The same host and port as this server: not another program on this computer.
+            (origin is not None and urlsplit(origin).netloc != request.headers.get("host"))
             or request.headers.get("sec-fetch-site") == "cross-site"
         ):
             return Response("Changes are accepted only from this demo's own pages.", status_code=403)
@@ -100,11 +101,24 @@ def create_app(service: ChatService) -> FastAPI:
             except ValueError as error:  # the service's own refusals, in plain words
                 raise HTTPException(400, str(error)) from None
 
+    def titles() -> dict[str, str]:
+        # Read each time, so pages indexed while the server runs are linked too.
+        return {row["slug"]: row["title"] for row in service.db.execute("select slug, title from pages")}
+
+    @app.exception_handler(StarletteHTTPException)
+    async def not_found(request: Request, error: StarletteHTTPException) -> Response:  # pyright: ignore[reportUnusedFunction]
+        if request.url.path.startswith("/api/"):
+            return JSONResponse({"detail": error.detail}, status_code=error.status_code)
+        return templates.TemplateResponse(
+            request, "error.html", {"detail": error.detail}, status_code=error.status_code
+        )
+
     def cited(ids: list[str]) -> list[dict[str, str]]:
+        known = act(titles)
         links: list[dict[str, str]] = []
         for passage in ids:
             page = passage.split("#")[0]
-            links.append({"id": passage, "title": titles.get(page, page), "url": f"/pages/{passage}"})
+            links.append({"id": passage, "title": known.get(page, page), "url": f"/pages/{passage}"})
         return links
 
     def message(m: Message) -> dict[str, Any]:
@@ -116,8 +130,9 @@ def create_app(service: ChatService) -> FastAPI:
 
     @app.get("/pages/{slug}", response_class=HTMLResponse)
     def help_page(request: Request, slug: str) -> HTMLResponse:  # pyright: ignore[reportUnusedFunction]
-        if slug not in titles:
-            raise HTTPException(404, "no such help page")
+        known = act(titles)
+        if slug not in known:
+            raise HTTPException(404, "There's no such help page.")
         sections = act(
             lambda: service.db.execute(
                 "select id, heading, text from passages where page = ? order by position", (slug,)
@@ -127,7 +142,7 @@ def create_app(service: ChatService) -> FastAPI:
             request,
             "page.html",
             {
-                "title": titles[slug],
+                "title": known[slug],
                 "sections": [
                     {
                         "anchor": s["id"].split("#")[1],
@@ -164,7 +179,10 @@ def create_app(service: ChatService) -> FastAPI:
 
     @app.get("/agent/{conversation}", response_class=HTMLResponse)
     def agent_conversation(request: Request, conversation: str) -> HTMLResponse:  # pyright: ignore[reportUnusedFunction]
-        status = act(lambda: service.status(conversation))
+        try:
+            status = act(lambda: service.status(conversation))
+        except HTTPException:
+            raise HTTPException(404, "There's no such conversation.") from None
         return templates.TemplateResponse(
             request,
             "agent_conversation.html",
