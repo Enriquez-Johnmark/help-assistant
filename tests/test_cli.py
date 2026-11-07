@@ -39,3 +39,13 @@ def test_ask_without_an_api_key_says_where_to_put_it(
             ]
         )
     assert "ANTHROPIC_API_KEY" in capsys.readouterr().err
+
+
+def test_eval_without_recordings_says_how_to_record(
+    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+) -> None:
+    db = str(tmp_path / "help.db")
+    main(["--db", db, "index"])
+    with pytest.raises(SystemExit):
+        main(["--db", db, "eval", "--modes", "keyword"])
+    assert "eval --record" in capsys.readouterr().err

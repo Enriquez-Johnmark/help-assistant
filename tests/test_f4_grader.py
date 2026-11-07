@@ -1,13 +1,12 @@
-import json
 from pathlib import Path
 
 import pytest
 
-from help_assistant.evaluation.grader import Grader, grade_request
+from help_assistant.evaluation.grader import Grader, grade_request, load_grading_cases
 from help_assistant.model.client import SONNET, RecordedAnswerer, load_recordings
 from tests.fixtures.answerers import FakeAnswerer
 
-CASES = [json.loads(line) for line in Path("evalset/grading_cases.jsonl").read_text().splitlines() if line]
+CASES = load_grading_cases(Path("evalset/grading_cases.jsonl"))
 GRADES = Path("evalset/recorded/grades.json")
 
 
@@ -27,7 +26,7 @@ def test_f4_the_grader_is_sent_the_three_texts_redacted() -> None:
 
 def test_f4_the_grading_cases_have_right_and_wrong_replies() -> None:
     assert len(CASES) == 20
-    assert {case["correct"] for case in CASES} == {True, False}
+    assert {case.correct for case in CASES} == {True, False}
 
 
 @pytest.mark.skipif(
@@ -37,7 +36,7 @@ def test_f4_claude_grades_made_up_right_and_wrong_replies_as_they_should_be() ->
     grader = Grader(RecordedAnswerer(load_recordings(GRADES), SONNET))
     wrong: list[str] = []
     for case in CASES:
-        grade = grader.grade(case["question"], case["answer"], case["reply"])
-        if grade is None or grade.correct != case["correct"]:
-            wrong.append(case["id"])
+        grade = grader.grade(case.question, case.answer, case.reply)
+        if grade is None or grade.correct != case.correct:
+            wrong.append(case.id)
     assert wrong == []

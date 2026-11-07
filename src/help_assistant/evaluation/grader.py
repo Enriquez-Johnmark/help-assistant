@@ -1,6 +1,9 @@
 """Claude grades whether a reply gives the right answer (F4). Code checks the
 rest (citations, figures, hand-offs, refusals)."""
 
+from pathlib import Path
+from typing import Literal
+
 from pydantic import BaseModel, ConfigDict, ValidationError
 
 from help_assistant.core.secrets import redact
@@ -48,3 +51,21 @@ class Grader:
             return Grade.model_validate_json(raw)
         except ValidationError:
             return None
+
+
+class GradingCase(BaseModel):
+    """A made-up reply known to be right or wrong, for testing the grader (F4)."""
+
+    model_config = ConfigDict(extra="forbid", frozen=True)
+
+    id: str
+    question: str
+    answer: str
+    reply: str
+    correct: bool
+    made_up: Literal[True]
+
+
+def load_grading_cases(file: Path) -> list[GradingCase]:
+    lines = file.read_text(encoding="utf-8").splitlines()
+    return [GradingCase.model_validate_json(line) for line in lines if line.strip()]
