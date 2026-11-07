@@ -113,3 +113,17 @@ def test_b1_the_pages_an_answer_cites_are_kept_with_it() -> None:
     customer, assistant = service.messages(conversation)
     assert customer.cited == []
     assert assistant.cited == ["login-and-otp#if-the-otp-doesn-t-arrive"]
+
+
+def test_e3_a_hand_off_is_never_stored_without_its_log_entry(monkeypatch: pytest.MonkeyPatch) -> None:
+    service, _, _ = chat()
+    conversation = service.start()
+
+    def broken(*_: object, **__: object) -> None:
+        raise RuntimeError("the disk is full")
+
+    monkeypatch.setattr(service, "_audit", broken)
+    with pytest.raises(RuntimeError):
+        service.customer_message(conversation, "Can I talk to a real person?")
+    assert service.status(conversation) == "assistant"
+    assert service.messages(conversation) == []

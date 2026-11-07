@@ -13,6 +13,7 @@ from help_assistant.clock import Clock
 from help_assistant.core.handoff import mentions_money
 from help_assistant.core.language import Language
 from help_assistant.core.secrets import Redacted, redact
+from help_assistant.store.db import transaction
 
 Status = Literal["assistant", "waiting", "with_agent", "closed"]
 Sender = Literal["customer", "assistant", "agent"]
@@ -122,7 +123,7 @@ class ChatService:
 
     def customer_message(self, conversation_id: str, text: str) -> Reply:
         """The customer writes; the assistant answers, or keeps quiet while a person has the chat."""
-        with self.db:
+        with transaction(self.db):
             conversation, status = self._conversation(conversation_id)
             if status == "closed":
                 raise ValueError("this conversation is closed")
@@ -188,7 +189,7 @@ class ChatService:
     def agent_reply(self, conversation_id: str, agent: str, text: str) -> None:
         """An agent's reply, shown in the customer's chat (E2), redacted like everything stored."""
         name = _person(agent)
-        with self.db:
+        with transaction(self.db):
             self._person_has(conversation_id)
             self._add(conversation_id, "agent", redact(text).text)
             self.db.execute("update conversations set status = 'with_agent' where id = ?", (conversation_id,))
@@ -197,7 +198,7 @@ class ChatService:
     def hand_back(self, conversation_id: str, agent: str) -> None:
         """The agent gives the conversation back to the assistant (E2)."""
         name = _person(agent)
-        with self.db:
+        with transaction(self.db):
             self._person_has(conversation_id)
             self.db.execute(
                 "update conversations set status = 'assistant', handoff_reason = null, i_dont_knows = 0,"
@@ -208,7 +209,7 @@ class ChatService:
 
     def close(self, conversation_id: str, agent: str) -> None:
         name = _person(agent)
-        with self.db:
+        with transaction(self.db):
             if self.status(conversation_id) == "closed":
                 raise ValueError("this conversation is already closed")
             self.db.execute("update conversations set status = 'closed' where id = ?", (conversation_id,))

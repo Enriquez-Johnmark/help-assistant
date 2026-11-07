@@ -1,6 +1,7 @@
 """The SQLite database and its migrations; a released migration is never edited."""
 
 import sqlite3
+from types import TracebackType
 
 MIGRATIONS: tuple[str, ...] = (
     """
@@ -83,3 +84,19 @@ def open_db(path: str) -> sqlite3.Connection:
             f"begin;\n{sql}\ninsert into schema_migrations (version) values ({version});\ncommit;"
         )
     return db
+
+
+class transaction:  # noqa: N801  (used like a function: `with transaction(db):`)
+    """Everything inside is stored together or not at all. The connection is in
+    autocommit mode, where `with db:` alone would write each statement at once."""
+
+    def __init__(self, db: sqlite3.Connection) -> None:
+        self._db = db
+
+    def __enter__(self) -> None:
+        self._db.execute("begin")
+
+    def __exit__(
+        self, kind: type[BaseException] | None, error: BaseException | None, trace: TracebackType | None
+    ) -> None:
+        self._db.execute("rollback" if kind else "commit")
