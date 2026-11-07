@@ -41,6 +41,7 @@ def test_keyword_search_matches_simple_english_word_forms() -> None:
     assert index.search("school", 1) != []
     assert index.search("cancel", 1) != []
     assert KeywordIndex([passage("otp#late", "If the OTP doesn't arrive.")]).search("arriving", 1) != []
+    assert KeywordIndex([passage("cash-out#fees", "Fees for cashing out.")]).search("fee", 1) != []
 
 
 def test_the_glossary_adds_english_for_tagalog_money_words() -> None:
