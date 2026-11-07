@@ -52,7 +52,8 @@ _EMAIL = re.compile(r"[\w.+-]+@[\w-]+(?:\.[\w-]+)+")
 _MOBILE = re.compile(r"(?<![\d+])(?:\+?63[\s-]?|0)9\d{2}[\s-]?\d{3}[\s-]?\d{4}(?!\d)")
 _DIGIT_RUN = re.compile(r"(?<!\d)\d(?:[ -]?\d){9,18}(?!\d)")
 _CODE_WORDS = r"(?:m?pin|otp|one[- ]?time[- ]?(?:pin|password|code)|passcode|verification code|code)"
-_CODE = r"\d{3}[ -]?\d{1,3}|\d{4,8}"
+# A code as typed: "482913", "774 210", or one digit at a time ("4 8 2 9", "5-5-2-1").
+_CODE = r"\d(?:[ -]\d){3,7}|\d{3}[ -]?\d{1,3}|\d{4,8}"
 _CODE_AFTER_WORD = re.compile(rf"(?i)\b{_CODE_WORDS}\b[^\d.!?]{{0,40}}?(?<!\d)({_CODE})(?!\d)")
 _CODE_BEFORE_WORD = re.compile(rf"(?i)(?<!\d)({_CODE})(?!\d)[^\d.!?]{{0,20}}?\b{_CODE_WORDS}\b")
 _ONLY_A_CODE = re.compile(r"^\s*(\d{4,8}|\d{3} \d{3})\s*$")

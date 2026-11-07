@@ -11,6 +11,8 @@ CASES: list[tuple[str, str, list[str]]] = [
     ("Pin ko ay 1234", "1234", ["pin_or_otp"]),
     ("Here is my one-time pin 908172", "908172", ["pin_or_otp"]),
     ("482913", "482913", ["pin_or_otp"]),
+    ("PIN ko 4 8 2 9", "4 8 2 9", ["pin_or_otp"]),
+    ("the otp is 5-5-2-1", "5-5-2-1", ["pin_or_otp"]),
     ("Card ko 4111 1111 1111 1111 na-charge twice", "4111 1111 1111 1111", ["card_number"]),
     ("my card 5500-0000-0000-0004 was declined", "5500-0000-0000-0004", ["card_number"]),
     ("Account number ko 0012345678901 sa bank", "0012345678901", ["account_number"]),
