@@ -66,3 +66,59 @@ def check_numbers(reply: str, cited: Iterable[Passage]) -> list[Broken]:
     if unsupported:
         return [Broken("unsupported_number", f"figures not in the cited pages: {', '.join(unsupported)}")]
     return []
+
+
+# Promises about the customer's own case. Policies quoted from the pages ("the
+# amount is returned in full", "most transfers finish within 15 minutes") are
+# not promises; a promise is someone saying it *will* happen for this customer.
+_PROMISES: tuple[re.Pattern[str], ...] = tuple(
+    re.compile(pattern)
+    for pattern in (
+        r"\b(?:we|i)(?:'ll| will| shall)\s+(?:\w+\s+){0,2}?"
+        r"(?:refund|reimburse|return|reverse|credit|restore|fix|resolve|send back|make sure)",
+        r"\byou(?:'ll| will)\s+(?:\w+\s+){0,2}?(?:get|receive|have)\s+"
+        r"(?:\w+\s+){0,3}?(?:refund|money|cash|funds)\b",
+        r"\byour\s+(?:money|refund|transfer|item|fee|cash|balance)\s+will\s+(?:be|arrive|come)\b",
+        r"\b(?:i|we)\s+(?:promise|guarantee|assure)\b|\bguaranteed?\b",
+        r"\b(?:ibabalik|ire-?refund|aayusin)\s+(?:po\s+)?namin\b",
+        r"\b(?:sigurado\w*|pangako|ipinapangako|makakaasa|garantisado)\b",
+    )
+)
+
+_SECRET = re.compile(
+    r"\b(?:account (?:number|no)|card (?:number|no)|m?pin|otp|one[- ]time (?:pin|password|code)"
+    r"|password|passcode|cvv)\b"
+)
+# Asking for something to be given to us, not telling the customer to use their
+# own PIN in the app ("confirm with your PIN" is how the app works).
+_REQUEST = re.compile(
+    r"\b(?:send|give|share|provide|tell|reply with|dm|forward|message us|ibigay|bigay|ipadala|i-?send"
+    r"|i-?share|sabihin|paki-?\w*)\b"
+)
+_NEGATION = {"never", "don't", "dont", "not", "huwag", "wag", "hindi", "kailanman"}
+_SENTENCE = re.compile(r"(?<=[.!?])\s+|\n+")
+_CLAUSE = re.compile(r"[,;:]")
+
+
+def _asks_for_secret(sentence: str) -> bool:
+    """A sentence names a secret and has a request that isn't negated just
+    before it, within its own clause ("never share your PIN" passes)."""
+    if not _SECRET.search(sentence):
+        return False
+    for request in _REQUEST.finditer(sentence):
+        clause = _CLAUSE.split(sentence[: request.start()])[-1]
+        if not set(re.findall(r"[a-z']+", clause)[-3:]) & _NEGATION:
+            return True
+    return False
+
+
+def check_rules(reply: str) -> list[Broken]:
+    """A reply promises no refund, outcome or date, and asks for no secret, in
+    English, Tagalog or Taglish (B5)."""
+    lowered = reply.lower()
+    broken: list[Broken] = []
+    if any(pattern.search(lowered) for pattern in _PROMISES):
+        broken.append(Broken("promise", "promises a refund, an outcome or a date"))
+    if any(_asks_for_secret(sentence) for sentence in _SENTENCE.split(lowered)):
+        broken.append(Broken("asks_for_secret", "asks for a PIN, OTP, password, card or account number"))
+    return broken
