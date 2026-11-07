@@ -17,7 +17,8 @@ _ASKS_FOR_PERSON = _any(
     r"(?:real\s+|live\s+|human\s+)?(?:person|human|agent|someone|somebody|representative|staff)\b",
     r"\b(?:connect|transfer|pass)\s+me\s+to\s+(?:a\s+|an\s+)?(?:real\s+|live\s+)?(?:person|human|agent)\b",
     r"\b(?:real|live|human)\s+(?:person|agent)\b",
-    r"\bmakausap\s+(?:po\s+)?(?:ang|ng|ko\s+ang)?\s*(?:tao|agent|staff|tauhan)\b",
+    # makausap, pakikausap, kausapin… "(ang/ng) (isang) tao": to talk to a person.
+    r"\b(?:ma|paki|pa)?kausap(?:in)?\s+(?:po\s+)?(?:ako\s+)?(?:ang|ng|ko\s+ang)?\s*(?:isang\s+)?(?:tao|agent|staff|tauhan)\b",
     r"\bgusto\s+ko\s+(?:po\s+)?(?:ng\s+)?(?:tao|agent|kausap)\b",
     r"\bmay\s+tao\s+ba\b",
     r"\bpakausap\b",

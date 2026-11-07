@@ -16,6 +16,9 @@ from help_assistant.core.messages import HANDOFF, I_DONT_KNOW, SECRET_WARNING
         "Pwede po bang makausap ang tao?",
         "gusto ko ng agent, hindi bot",
         "may tao ba dyan?",
+        "Gusto ko pong makausap ang isang tao",
+        "Pakikausap po ako ng isang tao",
+        "Puwede ko bang kausapin ang isang agent?",
     ],
 )
 def test_d1_asking_for_a_person_hands_off(message: str) -> None:
