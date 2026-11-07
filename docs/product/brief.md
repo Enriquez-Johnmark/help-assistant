@@ -1,6 +1,6 @@
 # Brief: Help Assistant
 
-Status: **draft, for the owner's approval**. Once approved, the spec (`spec.md`) is decided round by round from it. "Help Assistant" is a working name.
+Status: **approved by the owner** (2026-11-07). Once approved, the spec (`spec.md`) is decided round by round from it. "Help Assistant" is a working name.
 
 ## In one sentence
 
