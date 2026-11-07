@@ -4,8 +4,11 @@ help-assistant search "question"     the passages a question finds
 """
 
 import argparse
+import os
 from pathlib import Path
 
+from help_assistant.assistant import Assistant, Conversation
+from help_assistant.model.client import HAIKU, SONNET, ClaudeAnswerer
 from help_assistant.pages.reader import read_pages
 from help_assistant.search.combined import Searcher
 from help_assistant.search.embeddings import FastEmbedder
@@ -24,6 +27,9 @@ def main(argv: list[str] | None = None) -> int:
     search = commands.add_parser("search", help="the passages a question finds")
     search.add_argument("question")
     search.add_argument("--mode", choices=["combined", "keyword"], default="combined")
+    ask = commands.add_parser("ask", help="the assistant's answer to a question")
+    ask.add_argument("question")
+    ask.add_argument("--model", choices=["haiku", "sonnet"], default="haiku")
     args = parser.parse_args(argv)
 
     Path(args.db).parent.mkdir(parents=True, exist_ok=True)
@@ -35,6 +41,25 @@ def main(argv: list[str] | None = None) -> int:
     passages = all_passages(db)
     if not passages:
         parser.error("no passages yet: run `help-assistant index` first")
+    if args.command == "ask":
+        # The owner's API key, kept out of git in .env; never a Claude subscription.
+        if Path(".env").exists():
+            for line in Path(".env").read_text(encoding="utf-8").splitlines():
+                key, _, value = line.partition("=")
+                if key.strip() and not key.startswith("#") and value.strip():
+                    os.environ.setdefault(key.strip(), value.strip())
+        if not os.environ.get("ANTHROPIC_API_KEY"):
+            parser.error("put your Anthropic API key in .env as ANTHROPIC_API_KEY")
+        answerer = ClaudeAnswerer(SONNET if args.model == "sonnet" else HAIKU)
+        reply = Assistant(Searcher(passages, FastEmbedder()), answerer).respond(Conversation(), args.question)
+        print(reply.text)
+        if reply.cited:
+            print(f"\nFrom: {', '.join(reply.cited)}")
+        if reply.reason:
+            print(f"\n(handed to a person: {reply.reason})")
+        for broken in reply.broken:
+            print(f"(refused: {broken.detail})")
+        return 0
     searcher = Searcher(passages, FastEmbedder() if args.mode == "combined" else None)
     for hit in searcher.search(args.question, 5, mode=args.mode):
         print(f"{hit.passage.id}\n  {hit.passage.text.splitlines()[1][:100]}")
