@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from typing import Literal
 
 from help_assistant.core.language import Language
-from help_assistant.core.secrets import Redacted
+from help_assistant.core.secrets import Redacted, redact
 from help_assistant.pages.reader import Passage
 
 LANGUAGE_NAMES: dict[Language, str] = {"english": "English", "tagalog": "Tagalog", "taglish": "Taglish"}
@@ -64,11 +64,15 @@ def build_request(
     language: Language,
 ) -> ModelRequest:
     """The request for one answer: the conversation so far, the passages found
-    and the question. The customer's words must be `Redacted` (C3); the
-    assistant's own earlier replies are its own text."""
+    and the question. The customer's words must be `Redacted` (C3); earlier
+    replies are redacted here."""
     messages: list[tuple[Literal["user", "assistant"], str]] = []
     for role, text in history:
-        messages.append(("user", _redacted(text)) if role == "customer" else ("assistant", str(text)))
+        # The assistant's and a support agent's earlier replies are redacted too, so
+        # a secret typed into a reply can't reach the model either (C3).
+        messages.append(
+            ("user", _redacted(text)) if role == "customer" else ("assistant", redact(str(text)).text)
+        )
     found = "\n".join(f'<passage id="{p.id}">\n{p.text}\n</passage>' for p in passages)
     messages.append(
         (

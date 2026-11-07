@@ -119,3 +119,12 @@ def test_after_a_hand_off_the_assistant_stays_quiet_for_the_person() -> None:
     later = helper.respond(conversation, "Hello?")
     assert later.kind == "with_person"
     assert fake.seen == []
+
+
+def test_c3_an_earlier_reply_with_a_secret_is_hidden_before_it_reaches_the_model() -> None:
+    history = [
+        ("customer", redact("Can you check?").text),
+        ("assistant", "I see account 0012345678901 here."),
+    ]
+    request = build_request("fake-model", history, redact("Thanks").text, [], "english")  # type: ignore[arg-type]
+    assert "0012345678901" not in request.to_json()
