@@ -95,7 +95,8 @@ class RecordedAnswerer:
 
 
 class RecordingAnswerer:
-    """Asks the live model and saves each answer to `file` as it comes."""
+    """Asks the live model for what isn't recorded yet, and saves each answer to
+    `file` as it comes."""
 
     def __init__(self, live: Answerer, file: Path) -> None:
         self._live = live
@@ -104,8 +105,13 @@ class RecordingAnswerer:
         self.model = live.model
 
     def answer(self, request: ModelRequest) -> str:
+        key = recording_key(request)
+        # An answer already recorded for this exact request is reused, so
+        # recording again pays only for what changed.
+        if key in self._recordings:
+            return self._recordings[key]
         raw = self._live.answer(request)
-        self._recordings[recording_key(request)] = raw
+        self._recordings[key] = raw
         self._file.parent.mkdir(parents=True, exist_ok=True)
         self._file.write_text(json.dumps(self._recordings, indent=1, sort_keys=True) + "\n", encoding="utf-8")
         return raw

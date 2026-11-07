@@ -50,3 +50,15 @@ def test_b3_an_answer_the_sdk_cant_validate_becomes_empty_not_a_crash() -> None:
     with pytest.raises(ValidationError):
         parse()
     assert claude.answer(request("When do branches open?")) == ""
+
+
+def test_recording_again_reuses_answers_already_recorded(tmp_path: Path) -> None:
+    file = tmp_path / "recorded.json"
+    live = FakeAnswerer(lambda _: answer("Branches open at 8:00.", ["branch-hours#opening-hours"]))
+    RecordingAnswerer(live, file).answer(request("When do branches open?"))
+
+    again = RecordingAnswerer(live, file)
+    again.answer(request("When do branches open?"))
+    again.answer(request("When do branches close?"))
+
+    assert len(live.seen) == 2  # the first question once, the new one once
