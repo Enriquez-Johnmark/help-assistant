@@ -95,6 +95,14 @@ Behind an interface with two versions:
 - **Search on the test set** (without a key): combined search finds the right page in the top 5 for 37 of the 40 Tagalog and Taglish questions (92%) and 59 of the 60 English ones; keyword search alone, 39 of 40 and 59 of 60. A2 is checked on these questions, which search wasn't tuned on.
 - **Recordings:** `evalset/recorded/answers.json` (both models, both searches, keyed by the exact request) and `grades.json` (Claude Sonnet's grades, the 20 grading cases included). Recording again reuses what is there. A replay fails, with a message saying to re-record, if the prompt, the questions, the pages or the passages found changed.
 
+## The web app, as built
+
+- **Pages** (`web/`, Jinja2 with a little plain JavaScript): the chat at `/`, which checks for new messages every 3 seconds and links each answer to the help page section it cites (`/pages/<page>#<section>`); the agents' list at `/agent`, money first, then the longest waiting; one conversation at `/agent/<id>`, where an agent, by name, replies, hands back or closes, and which shows new customer messages; and the owner's view at `/owner`: unanswered questions by topic, hand-offs by reason and the audit log.
+- **Stored together:** each customer message, the reply, the hand-off and its log entry are written in one transaction, or not at all.
+- **On this computer only** (G1): the server listens on 127.0.0.1; a request whose Host isn't 127.0.0.1, localhost or [::1] is refused (DNS rebinding), and so is a change whose Origin isn't this server's own host and port (another site, or another program on this computer). Pages allow scripts only from the server itself. A failed model call gives the customer a plain "try again" and logs only the error's kind and status.
+- **One request at a time** uses the conversation store, the model call included: enough for a demo on one computer, and simpler than sharing the SQLite connection safely.
+- **Every page**, a missing one included, ends with "A demo for Halimbawa Money, a made-up company. Not affiliated with any real company." (G2)
+
 ## Time and privacy
 
 Time is read only through an injected clock. The server listens on 127.0.0.1 only and answers only requests addressed to it (G1). The API key lives in `.env` and is never in a page, an answer or a log; the model client's errors are reported by kind and status only.
