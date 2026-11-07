@@ -19,6 +19,8 @@ CASES: list[tuple[str, str, list[str]]] = [
     ("acct no. 12345678901234 please check", "12345678901234", ["account_number"]),
     ("My password is Juan@2026 and it doesn't work", "Juan@2026", ["password"]),
     ("password ko ay mahalpusa99", "mahalpusa99", ["password"]),
+    ("password ko mahalpusa99 pero ayaw", "mahalpusa99", ["password"]),
+    ("my password Juan@2026 won't work", "Juan@2026", ["password"]),
     ("Text me at 09171234567", "09171234567", ["mobile_number"]),
     ("number ko +63 917 123 4567 po", "+63 917 123 4567", ["mobile_number"]),
     ("email ko ana.cruz@example.test", "ana.cruz@example.test", ["email"]),
@@ -32,6 +34,8 @@ KEPT = [
     "Pwede ba mag-cash in ng 10,000 sa branch?",
     "My reference number is HM4K2P9Q7X",
     "I sent it 3 days ago at 2 pm",
+    "My password reset doesn't work",
+    "Paano palitan ang password ko?",
 ]
 
 

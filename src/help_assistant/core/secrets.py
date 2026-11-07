@@ -58,6 +58,20 @@ _CODE_AFTER_WORD = re.compile(rf"(?i)\b{_CODE_WORDS}\b[^\d.!?]{{0,40}}?(?<!\d)({
 _CODE_BEFORE_WORD = re.compile(rf"(?i)(?<!\d)({_CODE})(?!\d)[^\d.!?]{{0,20}}?\b{_CODE_WORDS}\b")
 _ONLY_A_CODE = re.compile(r"^\s*(\d{4,8}|\d{3} \d{3})\s*$")
 _PASSWORD = re.compile(r"(?i)\b(?:password|passwd|pw)\b(?:\s+ko)?(?:\s+po)?\s*(?:is|ay|:|=)\s*(\S+)")
+# Without "is", "ay" or ":", the next word is a password only if it looks like
+# one, so "my password reset doesn't work" keeps its words.
+_PASSWORD_BARE = re.compile(r"(?i)\b(?:password|passwd|pw)\b(?:\s+ko)?(?:\s+po)?\s+(\S+)")
+
+
+def _looks_like_a_password(word: str) -> bool:
+    word = word.strip(".,!?'\"")
+    return (
+        any(c.isdigit() for c in word)
+        or any(not c.isalnum() and c != "'" for c in word)
+        or (any(c.isupper() for c in word[1:]))
+    )
+
+
 _CARD_WORDS = re.compile(r"(?i)\b(?:card|credit|debit|visa|mastercard)\b")
 
 
@@ -103,4 +117,12 @@ def redact(text: str) -> Redaction:
     for pattern in (_CODE_AFTER_WORD, _CODE_BEFORE_WORD):
         text = pattern.sub(lambda m: m.group().replace(m.group(1), hide("pin_or_otp")), text)
     text = _PASSWORD.sub(lambda m: m.group().replace(m.group(1), hide("password")), text)
+    text = _PASSWORD_BARE.sub(
+        lambda m: (
+            m.group().replace(m.group(1), hide("password"))
+            if _looks_like_a_password(m.group(1)) and "hidden]" not in m.group(1)
+            else m.group()
+        ),
+        text,
+    )
     return Redaction(Redacted(text, _token=_TOKEN), found)
