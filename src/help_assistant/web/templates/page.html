@@ -7,7 +7,16 @@
   {% for section in sections %}
   <section id="{{ section.anchor }}">
     <h2>{{ section.heading }}</h2>
-    <p class="text">{{ section.text }}</p>
+    {% for block in section.blocks %}
+    {% if block.kind == "table" %}
+    <table>
+      <tr>{% for cell in block.head %}<th>{{ cell }}</th>{% endfor %}</tr>
+      {% for row in block.rows %}<tr>{% for cell in row %}<td>{{ cell }}</td>{% endfor %}</tr>{% endfor %}
+    </table>
+    {% else %}
+    <p class="text">{{ block.text }}</p>
+    {% endif %}
+    {% endfor %}
   </section>
   {% endfor %}
 </article>

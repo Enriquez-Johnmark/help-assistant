@@ -164,3 +164,11 @@ def test_times_are_shown_in_manila_time() -> None:
         page = web.get(path).text
         assert "7 Nov 2026, 10:00 AM" in page
         assert "+00:00" not in page
+
+
+def test_a_help_pages_table_is_shown_as_a_table() -> None:
+    page = client().get("/pages/send-money-fees").text
+    assert "<table" in page
+    assert "<th>Amount sent</th>" in page
+    assert "<td>Up to ₱1,000</td>" in page
+    assert "| ---" not in page

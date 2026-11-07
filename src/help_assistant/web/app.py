@@ -65,6 +65,21 @@ def manila_time(stored: str | None) -> str:
     return f"{at.day} {at:%b %Y}, {hour}:{at:%M} {'AM' if at.hour < 12 else 'PM'}"
 
 
+def blocks(text: str) -> list[dict[str, Any]]:
+    """A passage as paragraphs and tables, for its help page. The pages use
+    Markdown tables and nothing else; every cell is escaped by the template."""
+    out: list[dict[str, Any]] = []
+    for block in text.split("\n\n"):
+        lines = [line.strip() for line in block.strip().splitlines()]
+        if lines and all(line.startswith("|") for line in lines):
+            rows = [[cell.strip() for cell in line.strip("|").split("|")] for line in lines]
+            body = [row for row in rows[1:] if not all(set(cell) <= set("-: ") for cell in row)]
+            out.append({"kind": "table", "head": rows[0], "rows": body})
+        elif lines:
+            out.append({"kind": "text", "text": block.strip()})
+    return out
+
+
 def _local(host: str | None) -> bool:
     """Whether a Host header or an origin's host names this computer."""
     if not host:
@@ -161,7 +176,7 @@ def create_app(service: ChatService) -> FastAPI:
                     {
                         "anchor": s["id"].split("#")[1],
                         "heading": s["heading"],
-                        "text": s["text"].partition("\n")[2],
+                        "blocks": blocks(s["text"].partition("\n")[2]),
                     }
                     for s in sections
                 ],
