@@ -56,7 +56,9 @@ class Assistant:
         history = list(conversation.turns)
         conversation.turns.append(("customer", hidden.text))
         if conversation.handed_off:
-            return Reply("with_person", "", reason=conversation.handed_off, warned=hidden.warn)
+            # A person has the chat: the assistant is quiet, except to warn (C2).
+            warning = SECRET_WARNING[language] if hidden.warn else ""
+            return Reply("with_person", warning, reason=conversation.handed_off, warned=hidden.warn)
 
         reply = self._answer(conversation, history, hidden.text, language)
         if hidden.warn:  # C2

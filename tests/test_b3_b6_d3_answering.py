@@ -128,3 +128,12 @@ def test_c3_an_earlier_reply_with_a_secret_is_hidden_before_it_reaches_the_model
     ]
     request = build_request("fake-model", history, redact("Thanks").text, [], "english")  # type: ignore[arg-type]
     assert "0012345678901" not in request.to_json()
+
+
+def test_c2_a_customer_waiting_for_a_person_is_still_warned_about_a_secret() -> None:
+    helper = assistant(FakeAnswerer(lambda _: answer("unused", [FEES])))
+    conversation = Conversation()
+    helper.respond(conversation, "I want to talk to a real person")
+    later = helper.respond(conversation, "my pin is 482913 by the way")
+    assert later.kind == "with_person"
+    assert later.text == SECRET_WARNING["english"]
