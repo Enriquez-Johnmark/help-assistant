@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING, Protocol
 
 from anthropic.types import MessageParam
-from pydantic import ValidationError
+from pydantic import BaseModel, ValidationError
 
 from help_assistant.model.answer import ModelAnswer
 from help_assistant.model.request import ModelRequest
@@ -33,13 +33,17 @@ def recording_key(request: ModelRequest) -> str:
     return hashlib.sha256(request.to_json().encode()).hexdigest()
 
 
-class ClaudeAnswerer:
-    """Claude through the owner's API key (`ANTHROPIC_API_KEY`), never a subscription."""
+class ClaudeStructured:
+    """Claude through the owner's API key (`ANTHROPIC_API_KEY`), never a
+    subscription, answering as `output_format`, a strict Pydantic type."""
 
-    def __init__(self, model: str = HAIKU, client: "anthropic.Anthropic | None" = None) -> None:
+    def __init__(
+        self, model: str, output_format: type[BaseModel], client: "anthropic.Anthropic | None" = None
+    ) -> None:
         import anthropic  # loaded only when Claude is used live
 
         self.model = model
+        self._output_format = output_format
         self._client = client or anthropic.Anthropic()
 
     def answer(self, request: ModelRequest) -> str:
@@ -53,7 +57,7 @@ class ClaudeAnswerer:
                 max_tokens=4096,
                 system=request.system,
                 messages=messages,
-                output_format=ModelAnswer,
+                output_format=self._output_format,
             )
         except ValidationError:
             # The SDK checks the answer against the type itself: an answer that
@@ -63,6 +67,13 @@ class ClaudeAnswerer:
         if response.stop_reason != "end_turn" or response.parsed_output is None:
             return ""
         return response.parsed_output.model_dump_json()
+
+
+class ClaudeAnswerer(ClaudeStructured):
+    """Claude answering a customer, as a `ModelAnswer`."""
+
+    def __init__(self, model: str = HAIKU, client: "anthropic.Anthropic | None" = None) -> None:
+        super().__init__(model, ModelAnswer, client)
 
 
 class NotRecordedError(KeyError):
