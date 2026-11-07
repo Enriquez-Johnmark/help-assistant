@@ -17,14 +17,14 @@ Mode = Literal["keyword", "combined"]
 _DEPTH = 5
 
 
-def fuse(rankings: Sequence[Sequence[str]], k: int = 60) -> list[str]:
+def fuse(rankings: Sequence[Sequence[str]], k: int = 60) -> list[tuple[str, float]]:
     """Reciprocal rank fusion: each list adds 1 / (k + rank) to an item's score,
-    so an item both lists rank highly comes first."""
+    so an item both lists rank highly comes first. Items with their scores."""
     scores: dict[str, float] = defaultdict(float)
     for ranking in rankings:
         for rank, item in enumerate(ranking, start=1):
             scores[item] += 1 / (k + rank)
-    return sorted(scores, key=lambda item: scores[item], reverse=True)
+    return sorted(scores.items(), key=lambda pair: pair[1], reverse=True)
 
 
 class Searcher:
@@ -50,5 +50,6 @@ class Searcher:
             pid: cosine(query_vector, vector) for pid, vector in zip(self._order, self._vectors, strict=True)
         }
         meaning = sorted(similarity, key=lambda pid: similarity[pid], reverse=True)[:_DEPTH]
+        # The scores are the fused ones, so they follow the order.
         fused = fuse([[hit.passage.id for hit in keyword], meaning])[:k]
-        return [Hit(self._passages[pid], similarity[pid]) for pid in fused]
+        return [Hit(self._passages[pid], score) for pid, score in fused]

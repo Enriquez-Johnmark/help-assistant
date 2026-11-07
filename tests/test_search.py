@@ -26,8 +26,8 @@ def test_keyword_search_finds_nothing_for_words_no_passage_has() -> None:
 
 def test_reciprocal_rank_fusion_rewards_a_passage_both_searches_rank_highly() -> None:
     fused = fuse([["a", "b", "c"], ["b", "c", "a"]])
-    assert fused[0] == "b"
-    assert set(fused) == {"a", "b", "c"}
+    assert fused[0][0] == "b"
+    assert {item for item, _ in fused} == {"a", "b", "c"}
 
 
 def test_keyword_only_mode_needs_no_embedding_model() -> None:
@@ -50,3 +50,27 @@ def test_the_glossary_adds_english_for_tagalog_money_words() -> None:
     assert "pawn" in expand("Paano mag-sangla ng alahas?")
     assert "redeem" in expand("Pwede bang tumubos?")
     assert expand("When are branches open?") == "When are branches open?"
+
+
+class FixedEmbedder:
+    """A stand-in model with chosen vectors: the OTP passage looks most like any
+    question, the fees passage least."""
+
+    def embed(self, texts: list[str]) -> list[object]:
+        import numpy as np
+
+        def vector(text: str) -> object:
+            if "OTP" in text:
+                return np.array([1.0, 0.0], dtype=np.float32)
+            if "Fees" in text:
+                return np.array([0.1, 1.0], dtype=np.float32)
+            return np.array([0.7, 0.7], dtype=np.float32)
+
+        return [vector(text) for text in texts]
+
+
+def test_combined_search_scores_follow_its_order() -> None:
+    # Keyword search finds only the fees passage; meaning search likes it least.
+    hits = Searcher(PASSAGES, embedder=FixedEmbedder()).search("fees", 3)  # type: ignore[arg-type]
+    scores = [hit.score for hit in hits]
+    assert scores == sorted(scores, reverse=True)
