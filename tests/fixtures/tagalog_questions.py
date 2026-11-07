@@ -1,0 +1,30 @@
+"""Made-up Taglish and Tagalog questions, one for each help page, with the page
+that answers it. Written for these tests; no real customer wrote them."""
+
+QUESTIONS: list[tuple[str, str]] = [
+    ("Paano magpadala ng pera sa branch?", "send-money"),
+    ("Magkano ang fee pag nagpadala ng 3,000?", "send-money-fees"),
+    ("Ano ang kailangan para makuha ang padala sa akin?", "receive-money"),
+    ("Pwede bang i-cancel ang padala na hindi pa nakukuha?", "change-or-cancel-a-transfer"),
+    ("Bakit Pending pa rin ang transfer ko?", "pending-transfers"),
+    ("Paano magbayad ng kuryente sa app?", "pay-bills"),
+    ("Kailan papasok sa biller ang bayad ko sa credit card?", "bills-posting-times"),
+    ("Pwede ba magbayad ng tuition sa school?", "billers"),
+    ("Paano po mag-sangla ng alahas?", "how-pawning-works"),
+    ("Magkano ang interest kada buwan sa sangla?", "pawn-loan-amounts"),
+    ("Paano i-renew ang sangla ko?", "renew-a-pawn-loan"),
+    ("Pwede bang ibang tao ang tumubos ng alahas ko?", "redeem-a-pawned-item"),
+    ("Ano ang mangyayari kung hindi ko natubos ang item?", "auction"),
+    ("Nawala ko yung pawn ticket, ano gagawin ko?", "lost-pawn-ticket"),
+    ("Paano mag sign up sa wallet?", "wallet-sign-up"),
+    ("Bakit na-reject ang ID verification ko?", "id-verification"),
+    ("Tinatanggap ba ang school ID?", "accepted-ids"),
+    ("Hindi dumating ang OTP ko", "login-and-otp"),
+    ("Nakalimutan ko ang PIN ko", "forgot-pin"),
+    ("Magkano ang fee sa cash out sa branch?", "cash-out"),
+    ("Hanggang magkano ang pwede ilagay sa wallet?", "wallet-limits"),
+    ("Anong oras bukas ang branch tuwing Sabado?", "branch-hours"),
+    ("Paano makausap ang customer service?", "contact-support"),
+    ("May nagtext na nanalo daw ako, scam ba ito?", "account-security"),
+    ("Paano mag cash in galing sa bank?", "cash-in"),
+]
