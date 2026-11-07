@@ -31,3 +31,22 @@ def test_a_changed_model_or_prompt_doesnt_reuse_an_old_answer() -> None:
     assert recording_key(request("When do branches open?")) != recording_key(
         request("When do branches open?", model="another-model")
     )
+
+
+def test_b3_an_answer_the_sdk_cant_validate_becomes_empty_not_a_crash() -> None:
+    from types import SimpleNamespace
+
+    from pydantic import ValidationError
+
+    from help_assistant.model.answer import ModelAnswer
+    from help_assistant.model.client import ClaudeAnswerer
+
+    def parse(**_: object) -> object:
+        ModelAnswer.model_validate({"reply": "x", "cited": [], "confidence": 1.5, "handoff": "none"})
+        raise AssertionError("unreachable")
+
+    fake_client = SimpleNamespace(messages=SimpleNamespace(parse=parse))
+    claude = ClaudeAnswerer(client=fake_client)  # type: ignore[arg-type]
+    with pytest.raises(ValidationError):
+        parse()
+    assert claude.answer(request("When do branches open?")) == ""

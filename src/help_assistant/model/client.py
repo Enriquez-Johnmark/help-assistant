@@ -4,12 +4,16 @@ answers for tests and CI, which need no key."""
 import hashlib
 import json
 from pathlib import Path
-from typing import Protocol
+from typing import TYPE_CHECKING, Protocol
 
 from anthropic.types import MessageParam
+from pydantic import ValidationError
 
 from help_assistant.model.answer import ModelAnswer
 from help_assistant.model.request import ModelRequest
+
+if TYPE_CHECKING:
+    import anthropic
 
 HAIKU = "claude-haiku-5-5"
 SONNET = "claude-sonnet-5-5"
@@ -32,24 +36,29 @@ def recording_key(request: ModelRequest) -> str:
 class ClaudeAnswerer:
     """Claude through the owner's API key (`ANTHROPIC_API_KEY`), never a subscription."""
 
-    def __init__(self, model: str = HAIKU) -> None:
+    def __init__(self, model: str = HAIKU, client: "anthropic.Anthropic | None" = None) -> None:
         import anthropic  # loaded only when Claude is used live
 
         self.model = model
-        self._client = anthropic.Anthropic()
+        self._client = client or anthropic.Anthropic()
 
     def answer(self, request: ModelRequest) -> str:
         messages: list[MessageParam] = [
             {"role": "user", "content": text} if role == "user" else {"role": "assistant", "content": text}
             for role, text in request.messages
         ]
-        response = self._client.messages.parse(
-            model=request.model,
-            max_tokens=4096,
-            system=request.system,
-            messages=messages,
-            output_format=ModelAnswer,
-        )
+        try:
+            response = self._client.messages.parse(
+                model=request.model,
+                max_tokens=4096,
+                system=request.system,
+                messages=messages,
+                output_format=ModelAnswer,
+            )
+        except ValidationError:
+            # The SDK checks the answer against the type itself: an answer that
+            # doesn't fit is "I don't know", not a crash (B3).
+            return ""
         # A refusal or a cut-off answer has nothing usable: "I don't know".
         if response.stop_reason != "end_turn" or response.parsed_output is None:
             return ""
