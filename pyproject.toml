@@ -1,0 +1,49 @@
+[project]
+name = "help-assistant"
+version = "0.1.0"
+description = "An AI assistant that answers customers' questions from a company's own help pages, in Taglish, Tagalog or English, and hands off to a person when unsure."
+authors = [
+    { name = "Enriquez-Johnmark", email = "enriquezjohnmark15@gmail.com" }
+]
+requires-python = ">=3.12"
+license = "MIT"
+dependencies = [
+    "pydantic>=2.14.3",
+]
+
+[build-system]
+requires = ["uv_build>=0.11.32,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.414",
+    "pytest>=9.2.0",
+    "ruff>=0.17.4",
+]
+
+[project.scripts]
+help-assistant = "help_assistant.cli:main"
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "SIM", "RUF", "DTZ", "S", "PT", "N", "TID"]
+ignore = ["S101"]
+
+[tool.ruff.lint.flake8-tidy-imports.banned-api]
+"datetime.datetime.now".msg = "Read time through the Clock."
+"datetime.datetime.utcnow".msg = "Read time through the Clock."
+"time.time".msg = "Read time through the Clock."
+
+[tool.pyright]
+include = ["src", "tests"]
+typeCheckingMode = "strict"
+pythonVersion = "3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
