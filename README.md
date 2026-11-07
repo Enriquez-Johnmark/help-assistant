@@ -4,7 +4,7 @@
 
 It is built for money-services companies (sending money, bills payment, pawning, e-wallets) and works for any of them, given their help pages. The demo uses a made-up company, Halimbawa Money, with made-up help pages; it is **not affiliated with any real company**.
 
-Status: building. The [brief](docs/product/brief.md), [spec](docs/product/spec.md) (27 acceptance criteria) and [architecture](docs/architecture.md) are approved; the build follows the [roadmap](ROADMAP.md). M1 is done: 25 made-up help pages, read into passages, and a local search that finds the English page for 24 of 25 made-up Tagalog and Taglish questions.
+Status: building. The [brief](docs/product/brief.md), [spec](docs/product/spec.md) (27 acceptance criteria) and [architecture](docs/architecture.md) are approved; the build follows the [roadmap](ROADMAP.md). M1 is done: 25 made-up help pages, read into passages, and a local search that finds the English page for 24 of 25 made-up Tagalog and Taglish questions. M2 is done: PINs, OTPs, card and account numbers, passwords, mobile numbers and emails are hidden however they are typed, and code refuses answers that cite pages search didn't find, state figures their pages don't, promise outcomes or ask for a secret.
 
 ```sh
 uv sync

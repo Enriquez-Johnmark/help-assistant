@@ -53,6 +53,13 @@ On 25 made-up Taglish and Tagalog questions (one per help page), the right page 
 
 These were chosen on the same 25 questions, so the test set (M4), written separately, is the real measure; its report gives keyword and combined search side by side (F3).
 
+## Secrets and the answer checks, as built
+
+- **Hiding secrets** (`core/secrets.py`) runs in order: emails, mobile numbers, long numbers (a card if it passes the Luhn check and is 16 digits, grouped or called a card; otherwise an account number), PINs and OTPs near a word like "PIN", "OTP" or "code" (or a message that is only a code), then passwords after "password". Amounts, times, dates and reference numbers are kept.
+- **`Redacted`** is a text type only `redact` can create; the store and the model client accept nothing else, so a customer's raw words can't reach them (C3).
+- **Figures** in an answer must be on a cited page or in the customer's own question ("sending ₱3,000 costs ₱35"); "₱1,000", "1000" and "P1,000.00" count as the same figure, and number words in English and Tagalog are read as digits.
+- **Promises** are about the customer's own case ("we will refund you", "ibabalik po namin"); policies quoted from a page ("the amount is returned in full") are not. **Asking for a secret** means a request whose object is the secret ("send me your PIN"); "never share your PIN" and "confirm with your PIN" pass.
+
 ## Database
 
 SQLite through the standard library, one file in `data/` (ignored by git), with numbered migrations.

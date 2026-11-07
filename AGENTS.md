@@ -11,7 +11,7 @@ Each gate needs the owner's explicit "yes"; an approval for one phase never carr
 | 1. Brief | done, approved 2026-11-07 (`docs/product/brief.md`) |
 | 2. Spec & acceptance criteria | done, approved 2026-11-07 (`docs/product/spec.md`, 27 criteria) |
 | 3. Architecture | done, approved 2026-11-07 (`docs/architecture.md`) |
-| 4. Build | **in progress**: M1 (help pages, search) done; M2 (secrets, answer checks) next (`docs/architecture.md`) |
+| 4. Build | **in progress**: M1 (help pages, search) and M2 (secrets, answer checks) done; M3 (answering, hand-off) next (`docs/architecture.md`) |
 
 Code follows the build order in `docs/architecture.md`, one milestone at a time; each ends with a code review.
 

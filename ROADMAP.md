@@ -4,13 +4,13 @@ Where the Help Assistant stands and what comes next, in one page. The milestones
 
 ## Where we are
 
-**M1 done; M2 next.** The brief, the spec (27 acceptance criteria) and the architecture are approved.
+**M1 and M2 done; M3 next.** The brief, the spec (27 acceptance criteria) and the architecture are approved.
 
 | Milestone | Delivers | Criteria | Status |
 | --- | --- | --- | --- |
 | M1 | Setup, the made-up help pages, reading them into passages, keyword and embedding search | A1–A3 | Done (2026-11-07), code-reviewed |
-| M2 | Hiding secrets and the answer checks | B1, B2, B5, C1–C3 | **Next** |
-| M3 | Answering with Claude, the language check, hand-off | B3, B4, B6, D1–D5 | |
+| M2 | Hiding secrets and the answer checks | B1, B2, B5, C1–C3 | Done (2026-11-07), code-reviewed |
+| M3 | Answering with Claude, the language check, hand-off | B3, B4, B6, D1–D5 | **Next** |
 | M4 | The test set, the evaluation, Claude's grading, the report | F1–F4 | |
 | M5 | The chat page, the agent's and the owner's views, the audit log | E1–E4, G1, G2 | |
 | M6 | Live scores, README, screenshots, walkthrough video | — | |
