@@ -5,8 +5,8 @@ tuned to the test questions."""
 
 from help_assistant.search.keyword import words
 
-# Tagalog root → English words. A question word containing the root matches
-# ("magpadala", "padala", "ipinadala" all contain "padala").
+# Tagalog root → English words. A question word matches when it starts with the
+# root, alone or after a Tagalog prefix: "padala", "magpadala", "ipapadala".
 GLOSSARY: dict[str, str] = {
     "padala": "send money transfer receiver",
     "pera": "money",
@@ -56,13 +56,20 @@ GLOSSARY: dict[str, str] = {
 }
 
 
+_PREFIXES = ("", "mag", "nag", "ma", "na", "maka", "naka", "pag", "ipa", "i", "ipag", "pa", "um")
+
+
+def _has_root(word: str, root: str) -> bool:
+    return any(word.startswith(prefix + root) for prefix in _PREFIXES)
+
+
 def expand(question: str) -> str:
-    """`question` with the English for any glossary word it contains."""
-    lowered = question.lower()
+    """`question` with the English for any glossary word in it."""
+    lowered = f" {' '.join(words(question))} "
     question_words = words(question)
     extra = [
         english
         for root, english in GLOSSARY.items()
-        if (" " in root and root in lowered) or any(root in word for word in question_words)
+        if (" " in root and f" {root} " in lowered) or any(_has_root(word, root) for word in question_words)
     ]
     return f"{question} {' '.join(extra)}" if extra else question

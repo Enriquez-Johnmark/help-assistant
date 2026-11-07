@@ -50,6 +50,9 @@ def test_the_glossary_adds_english_for_tagalog_money_words() -> None:
     assert "pawn" in expand("Paano mag-sangla ng alahas?")
     assert "redeem" in expand("Pwede bang tumubos?")
     assert expand("When are branches open?") == "When are branches open?"
+    assert "send" in expand("Paano magpadala?")
+    # A root inside an English word doesn't count: "operator" holds "pera".
+    assert expand("Who is the operator here?") == "Who is the operator here?"
 
 
 class FixedEmbedder:
