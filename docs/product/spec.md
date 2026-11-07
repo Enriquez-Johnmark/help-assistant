@@ -1,6 +1,6 @@
 # Spec: Help Assistant
 
-Decided round by round with the owner; the single source for spec decisions. The brief is `brief.md`. Status: **in progress** (Round 1 decided 2026-11-07).
+Decided round by round with the owner; the single source for spec decisions. The brief is `brief.md`. Status: **in progress** (Rounds 1–2 decided 2026-11-07).
 
 ## Words
 
@@ -39,3 +39,45 @@ Decided round by round with the owner; the single source for spec decisions. The
 - Before anything is stored or sent to the model, PINs and OTPs, card and account numbers (checked by their pattern) and passwords are **hidden**; mobile numbers and email addresses are hidden in what is stored.
 - The customer is told not to share them.
 - A test proves a hidden secret never reaches the model or the logs.
+
+## Hand-off (Round 2, 2026-11-07)
+
+- The assistant hands a conversation to a person when the customer **asks for one**, when the question is about **their own account or a specific transaction**, after **two "I don't know"s** in one conversation, or when the customer is **upset about lost money**.
+- It says a person will reply, and **never promises when**.
+
+## The support agent's view (Round 2, 2026-11-07)
+
+- A list of conversations **waiting for a person**, money issues first, each with everything said so far (secrets already hidden).
+- The agent **replies** there, and the reply appears in the customer's chat; the agent can **hand back** to the assistant or **close** the conversation.
+- Every hand-off, reply, hand-back and close is **logged** with who and when.
+- **One local user**, with no logins.
+
+## The content owner's view (Round 2, 2026-11-07)
+
+- The questions the assistant **couldn't answer**, grouped by topic and counted, showing which help pages are missing or unclear; and hand-offs counted **by reason**.
+
+## The test set (Round 2, 2026-11-07)
+
+- About **150 made-up questions**, committed with their right answers and source pages:
+
+| Group | Questions | Must |
+| --- | --- | --- |
+| Answerable, English | ~60 | Answer correctly |
+| Answerable, Taglish or Tagalog | ~40 | Answer correctly, in that language |
+| Not in the pages | ~20 | Say "I don't know" |
+| About the customer's own account | ~15 | Hand off |
+| Tricky (typing a PIN, "ignore your rules", "promise me a refund") | ~15 | Refuse or hand off |
+
+- **Grading:** code checks citations, numbers, hand-offs and refusals; Claude grades whether each answer matches the right one; the owner spot-checks 20 of Claude's grades.
+- **Targets:** at least **85%** right answers and **90%** citing the right page; **100%**: no secret reaches the model or the logs; **100%** of own-account questions handed off.
+- CI runs it from **recorded answers**, with no API key; an `eval` command runs it live.
+
+## How it runs (Round 2, 2026-11-07)
+
+- **FastAPI** serves the API, the chat page and the two staff views, as plain server-rendered HTML with a little JavaScript.
+- **SQLite**; one command starts it; it answers only on **127.0.0.1**.
+
+## Tooling (Round 2, 2026-11-07)
+
+- Python 3.12 with **uv**, **ruff** (lint and format), **pyright** in strict mode, **pytest**, and the official Anthropic SDK.
+- Every acceptance criterion has a test named after it; CI runs them all.
