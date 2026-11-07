@@ -54,3 +54,10 @@ def test_b2_numbers_written_as_words_in_english_or_tagalog_count_too() -> None:
     assert numbers_in("wait two minutes, then limang minuto") == {"2", "5"}
     assert check_numbers("Maghintay ng dalawang minuto, tapos i-tap ang Resend.", [OTP]) == []
     assert check_numbers("Maghintay ng tatlong minuto.", [OTP]) != []
+
+
+def test_b2_the_customers_own_figures_may_be_repeated() -> None:
+    question = "Magkano ang fee pag nagpadala ng 3,000?"
+    assert check_numbers("Sending ₱3,000 costs ₱35.", [FEES], question=question) == []
+    # A figure in neither the pages nor the question is still refused.
+    assert check_numbers("Sending ₱3,000 costs ₱25.", [FEES], question=question) != []

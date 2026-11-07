@@ -56,10 +56,12 @@ def numbers_in(text: str, *, count_one: bool = False) -> set[str]:
     return found
 
 
-def check_numbers(reply: str, cited: Iterable[Passage]) -> list[Broken]:
+def check_numbers(reply: str, cited: Iterable[Passage], question: str = "") -> list[Broken]:
     """Every figure in the reply (a fee, amount, limit, time or number of days)
-    must appear in a passage it cites (B2), so no figure is made up."""
-    allowed: set[str] = set()
+    must appear in a passage it cites (B2), so no figure is made up. The
+    customer's own figures from `question` may be repeated ("sending ₱3,000
+    costs ₱35"): they come from the customer, not the model."""
+    allowed: set[str] = numbers_in(question, count_one=True)
     for passage in cited:
         allowed |= numbers_in(passage.text, count_one=True)
     unsupported = sorted(numbers_in(reply) - allowed)
