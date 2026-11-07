@@ -58,6 +58,11 @@ MIGRATIONS: tuple[str, ...] = (
     create trigger audit_log_no_delete before delete on audit_log
       begin select raise(abort, 'the audit log is append-only'); end;
     """,
+    # The passages each of the assistant's replies cites, so the chat can show
+    # where an answer comes from (B1) after the page reloads.
+    """
+    alter table messages add column cited text not null default '[]';
+    """,
 )
 
 

@@ -104,3 +104,12 @@ def test_c3_no_secret_reaches_the_database() -> None:
     dump = "\n".join(service.db.iterdump())
     for secret in ("482913", "0012345678901"):
         assert secret not in dump
+
+
+def test_b1_the_pages_an_answer_cites_are_kept_with_it() -> None:
+    service, _, _ = chat()
+    conversation = service.start()
+    service.customer_message(conversation, "My OTP didn't arrive")
+    customer, assistant = service.messages(conversation)
+    assert customer.cited == []
+    assert assistant.cited == ["login-and-otp#if-the-otp-doesn-t-arrive"]

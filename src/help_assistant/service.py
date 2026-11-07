@@ -23,6 +23,7 @@ class Message:
     sender: Sender
     text: str
     at: str
+    cited: list[str]
 
 
 @dataclass(frozen=True)
@@ -84,17 +85,20 @@ class ChatService:
 
     def messages(self, conversation_id: str) -> list[Message]:
         rows = self.db.execute(
-            "select sender, text, at from messages where conversation_id = ? order by id", (conversation_id,)
+            "select sender, text, at, cited from messages where conversation_id = ? order by id",
+            (conversation_id,),
         )
-        return [Message(row["sender"], row["text"], row["at"]) for row in rows]
+        return [Message(row["sender"], row["text"], row["at"], json.loads(row["cited"])) for row in rows]
 
-    def _add(self, conversation_id: str, sender: Sender, text: Redacted) -> None:
+    def _add(
+        self, conversation_id: str, sender: Sender, text: Redacted, cited: list[str] | None = None
+    ) -> None:
         # Only redacted text is stored (C3): checked at run time too.
         if not isinstance(text, Redacted):  # pyright: ignore[reportUnnecessaryIsInstance]
             raise TypeError("only redacted text is stored")
         self.db.execute(
-            "insert into messages (conversation_id, at, sender, text) values (?, ?, ?, ?)",
-            (conversation_id, self._now(), sender, text),
+            "insert into messages (conversation_id, at, sender, text, cited) values (?, ?, ?, ?, ?)",
+            (conversation_id, self._now(), sender, text, json.dumps(cited or [])),
         )
 
     def _audit(self, actor: str, action: str, conversation_id: str, **details: object) -> None:
@@ -128,7 +132,7 @@ class ChatService:
                 if sender == "customer":
                     self._add(conversation_id, "customer", redact(str(turn)).text)
                 elif turn:
-                    self._add(conversation_id, "assistant", redact(str(turn)).text)
+                    self._add(conversation_id, "assistant", redact(str(turn)).text, reply.cited)
             if reply.kind == "with_person" and reply.text:
                 self._add(conversation_id, "assistant", redact(reply.text).text)
             self.db.execute(
