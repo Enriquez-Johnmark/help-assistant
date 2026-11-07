@@ -60,6 +60,13 @@ These were chosen on the same 25 questions, so the test set (M4), written separa
 - **Figures** in an answer must be on a cited page or in the customer's own question ("sending ₱3,000 costs ₱35"); "₱1,000", "1000" and "P1,000.00" count as the same figure, and number words in English and Tagalog are read as digits.
 - **Promises** are about the customer's own case ("we will refund you", "ibabalik po namin"); policies quoted from a page ("the amount is returned in full") are not. **Asking for a secret** means a request whose object is the secret ("send me your PIN"); "never share your PIN" and "confirm with your PIN" pass.
 
+## Answering and hand-off, as built
+
+- **Hand-off rules** (`core/handoff.py`) run before the model: asking for a person; money lost or stolen (a loss word within three words of a money word, so "I lost my pawn ticket for my 5000 loan" is answered); or the customer's own account or transaction with something only a person can look up (a reference number, a date, a status, a charge, a hold). General "what do I do if…" questions are answered.
+- **The model** can also hand off, by its `handoff` field; an answer that doesn't parse, even one the SDK rejects, is "I don't know".
+- **Only the last six turns** go to the model with each question, all redacted, the assistant's and an agent's replies included.
+- **Language:** English is told from Tagalog and Taglish by common words. Taglish that borrows only English nouns may read as Tagalog; a Tagalog or Taglish customer accepts a reply in either.
+
 ## Database
 
 SQLite through the standard library, one file in `data/` (ignored by git), with numbered migrations.
