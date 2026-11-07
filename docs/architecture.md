@@ -1,6 +1,6 @@
 # Architecture
 
-Status: **draft, for the owner's approval**. The spec is `product/spec.md`; this says how it is built.
+Status: **approved by the owner** (2026-11-07). The spec is `product/spec.md`; this says how it is built.
 
 ## Shape
 
