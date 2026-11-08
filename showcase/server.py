@@ -4,7 +4,7 @@ By default its model refuses to be called: every conversation is one the rules
 in code hand to a person before any model is asked, so nothing shown is a
 model's answer. Run: uv run python showcase/server.py
 
-With `--claude`, Claude Haiku answers with combined search, as in `serve`. With
+With `--claude`, Claude Haiku answers with keyword search, as in `serve`. With
 the owner's key each new answer is asked live and saved to CLAUDE_ANSWERS;
 without one, the saved answers are replayed, so the screenshots and video can
 be made again without a key. Run: uv run python showcase/server.py --claude
@@ -30,7 +30,6 @@ from help_assistant.model.client import (
 from help_assistant.model.request import ModelRequest
 from help_assistant.pages.reader import read_pages
 from help_assistant.search.combined import Searcher
-from help_assistant.search.embeddings import FastEmbedder
 from help_assistant.service import ChatService
 from help_assistant.store.db import open_db
 from help_assistant.store.passages import all_passages, save_pages
@@ -68,9 +67,9 @@ def main() -> None:
     db = open_db(":memory:")
     save_pages(db, read_pages(Path("help_pages")))
     if "--claude" in sys.argv[1:]:
-        assistant = Assistant(Searcher(all_passages(db), FastEmbedder()), claude(), mode="combined")
+        assistant = Assistant(Searcher(all_passages(db), embedder=None), claude())
     else:
-        assistant = Assistant(Searcher(all_passages(db), embedder=None), NoModel(), mode="keyword")
+        assistant = Assistant(Searcher(all_passages(db), embedder=None), NoModel())
     app = create_app(ChatService(db, Ticking(), assistant))
     uvicorn.run(app, host="127.0.0.1", port=8013, log_level="warning")
 
