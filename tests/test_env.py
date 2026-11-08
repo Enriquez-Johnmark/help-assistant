@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 
 import pytest
@@ -26,3 +27,23 @@ def test_a_value_already_set_is_kept(tmp_path: Path, monkeypatch: pytest.MonkeyP
     import os
 
     assert os.environ["ONE"] == "from the shell"
+
+
+def test_the_owners_key_under_its_cloud_name_is_used(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # Set, then removed, so the test leaves no key behind for the others.
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "")
+    monkeypatch.delenv("ANTHROPIC_API_KEY")
+    monkeypatch.setenv("OWNER_ANTHROPIC_API_KEY", "sk-ant-made-up")
+    load_env(tmp_path / "missing.env")
+    assert os.environ["ANTHROPIC_API_KEY"] == "sk-ant-made-up"
+
+
+def test_a_key_in_env_wins_over_the_cloud_name(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    # Set, then removed, so the test leaves no key behind for the others.
+    monkeypatch.setenv("ANTHROPIC_API_KEY", "")
+    monkeypatch.delenv("ANTHROPIC_API_KEY")
+    monkeypatch.setenv("OWNER_ANTHROPIC_API_KEY", "sk-ant-cloud")
+    env = tmp_path / ".env"
+    env.write_text("ANTHROPIC_API_KEY=sk-ant-local\n")
+    load_env(env)
+    assert os.environ["ANTHROPIC_API_KEY"] == "sk-ant-local"

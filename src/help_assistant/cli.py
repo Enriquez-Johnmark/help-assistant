@@ -76,7 +76,10 @@ def main(argv: list[str] | None = None) -> int:
         # The owner's API key, kept out of git in .env; never a Claude subscription.
         load_env()
         if not os.environ.get("ANTHROPIC_API_KEY"):
-            parser.error("put your Anthropic API key in .env as ANTHROPIC_API_KEY")
+            parser.error(
+                "put your Anthropic API key in .env as ANTHROPIC_API_KEY"
+                " (in a cloud session: an environment variable, OWNER_ANTHROPIC_API_KEY)"
+            )
     if args.command == "serve":
         assistant = Assistant(Searcher(passages, FastEmbedder()), ClaudeAnswerer(MODELS[args.model]))
         app = create_app(ChatService(db, SystemClock(), assistant))
@@ -121,7 +124,10 @@ def run_eval(
     if record:
         load_env()
         if not os.environ.get("ANTHROPIC_API_KEY"):
-            parser.error("put your Anthropic API key in .env as ANTHROPIC_API_KEY")
+            parser.error(
+                "put your Anthropic API key in .env as ANTHROPIC_API_KEY"
+                " (in a cloud session: an environment variable, OWNER_ANTHROPIC_API_KEY)"
+            )
         grader = Grader(RecordingAnswerer(ClaudeStructured(SONNET, Grade), grades_file))
     elif not answers_file.exists():
         parser.error("no recorded answers yet: run `help-assistant eval --record` with your API key in .env")

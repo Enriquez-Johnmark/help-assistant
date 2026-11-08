@@ -3,12 +3,22 @@
 import os
 from pathlib import Path
 
+# In a cloud session the owner's key is kept under this name: Claude Code itself
+# reads ANTHROPIC_API_KEY, and the owner's key must pay for this app only.
+CLOUD_KEY = "OWNER_ANTHROPIC_API_KEY"
+
 
 def load_env(file: Path = Path(".env")) -> None:
     """Sets each `NAME=value` in `file` that isn't set already. Quotes around a
-    value are removed; empty values and comments are skipped."""
-    if not file.exists():
-        return
+    value are removed; empty values and comments are skipped. Without a key in
+    `.env` or the environment, the owner's key under `CLOUD_KEY` is used."""
+    if file.exists():
+        _read(file)
+    if not os.environ.get("ANTHROPIC_API_KEY") and os.environ.get(CLOUD_KEY):
+        os.environ["ANTHROPIC_API_KEY"] = os.environ[CLOUD_KEY]
+
+
+def _read(file: Path) -> None:
     for line in file.read_text(encoding="utf-8").splitlines():
         name, sep, value = line.partition("=")
         name, value = name.strip(), value.strip()

@@ -49,7 +49,7 @@ uv run help-assistant eval --record                          # the test set with
 uv run pytest
 ```
 
-Everything except live answers works without a key: the tests use recorded and stand-in answers.
+Everything except live answers works without a key: the tests use recorded and stand-in answers. In a Claude Code cloud session, set the key as the environment variable `OWNER_ANTHROPIC_API_KEY` instead, since Claude Code itself reads `ANTHROPIC_API_KEY`.
 
 The first search downloads a small multilingual model (about 240 MB) into `data/models`.
 
