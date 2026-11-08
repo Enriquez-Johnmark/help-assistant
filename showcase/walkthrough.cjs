@@ -5,7 +5,7 @@
 // The caption overlay and the recorder come from the Review Triage Agent and
 // Balanse, by the same author.
 const { execFileSync } = require("node:child_process")
-const { mkdirSync, mkdtempSync, writeFileSync } = require("node:fs")
+const { mkdirSync, mkdtempSync, rmSync, writeFileSync } = require("node:fs")
 const { tmpdir } = require("node:os")
 const { join } = require("node:path")
 const { chromium } = require("playwright")
@@ -108,6 +108,8 @@ async function record(page, dir) {
       "-vf", "fps=30,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2,format=yuv420p",
       "-c:v", "libx264", "-crf", "26", "-movflags", "+faststart", out,
     ])
+    // The frames are hundreds of megabytes; only the video is kept.
+    rmSync(dir, { recursive: true, force: true })
   }
 }
 
@@ -140,7 +142,7 @@ async function main() {
   await say(page, "Instructions hidden in a question don't change the answer.")
 
   await newChat(page)
-  await ask(page, "Pwede ba mag cash in sa 7-Eleven? Magkano charge?")
+  await ask(page, "May travel insurance ba kayo? Magkano po?")
   await say(page, "When the pages don't say, it says \"I don't know\" and offers a person.")
 
   await newChat(page)
@@ -159,8 +161,8 @@ async function main() {
   await page.locator("#reply").pressSequentially("Hi po, si Ana ito ng support. Titingnan ko po ang padala ninyo.", {
     delay: 25,
   })
-  await press(page, page.locator("button[data-action=reply]"))
-  await page.waitForLoadState("load")
+  // The page reloads once the reply is saved.
+  await Promise.all([page.waitForNavigation(), press(page, page.locator("button[data-action=reply]"))])
   await say(page, "Ana replies by name.", 3500)
 
   await press(page, page.getByRole("link", { name: "Help content" }))
