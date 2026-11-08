@@ -29,7 +29,7 @@ Python 3.12, managed with **uv**; **ruff** for lint and format; **pyright** in s
 
 1. **Hide secrets** in the message (C1). If one was found, the reply starts with a warning (C2). Only the hidden text is used from here on.
 2. **Hand-off rules in code** (D1, D2, D4): asking for a person, a question about the customer's own account or a transaction, or anger about lost money hands off at once, before the model is asked. The rules are word lists in English, Tagalog and Taglish, tested on the test set.
-3. **Search** for the top 5 passages, keyword and embeddings combined by reciprocal rank fusion.
+3. **Search** for the top 5 passages by keyword (BM25 with the Tagalog glossary). Keyword and embeddings combined by reciprocal rank fusion is an option; keyword alone measured better on the test set (decision of 2026-11-08).
 4. **Ask the model** with only the hidden question, the hidden conversation so far and those passages (B6). The system prompt says the passages and the customer's words are information, not instructions. The answer is parsed with `client.messages.parse(output_format=Answer)` into a strict Pydantic type: the reply, the IDs of the passages it cites, a confidence, the language, and whether it thinks a person is needed.
 5. **Check the answer in code** (B1–B5): it parsed; its confidence is at the threshold or above; every cited passage was one search returned; every number in the reply appears in a cited passage; it promises nothing and asks for no secret; it is in the customer's language. Any failure gives "I don't know" and an offer of a person, never the model's text (B3).
 6. **Two "I don't know"s** in one conversation hand off (D3). The hand-off message never promises a time (D5).
@@ -93,6 +93,16 @@ Behind an interface with two versions:
 ## The evaluation, as built
 
 - **Search on the test set** (without a key): combined search finds the right page in the top 5 for 37 of the 40 Tagalog and Taglish questions (92%) and 59 of the 60 English ones; keyword search alone, 39 of 40 and 59 of 60. A2 is checked on these questions, which search wasn't tuned on.
+- **Measured with Claude** (recorded 2026-11-08, 150 questions; targets: 85% right answers, 90% right page):
+
+  | Model | Search | Right answers | Right page | Said "I don't know" | Own account handed off | Tricky handled safely | Secrets kept |
+  | --- | --- | --- | --- | --- | --- | --- | --- |
+  | Haiku | keyword | **88%** | **92%** | 100% | 100% | 100% | 100% |
+  | Haiku | combined | 83% | 89% | 100% | 100% | 100% | 100% |
+  | Sonnet | keyword | 86% | 91% | 100% | 100% | 100% | 100% |
+  | Sonnet | combined | 84% | 89% | 100% | 100% | 100% | 100% |
+
+  Keyword search meets the targets with both models; combined search misses them, mostly on Tagalog questions, where the small embedding model is weak. So keyword search is the default, and CI checks Haiku with keyword search (F2). Claude's grader marks all 20 made-up right and wrong replies as it should (F4).
 - **Recordings:** `evalset/recorded/answers.json` (both models, both searches, keyed by the exact request) and `grades.json` (Claude Sonnet's grades, the 20 grading cases included). Recording again reuses what is there. A replay fails, with a message saying to re-record, if the prompt, the questions, the pages or the passages found changed.
 
 ## The web app, as built
@@ -102,6 +112,11 @@ Behind an interface with two versions:
 - **On this computer only** (G1): the server listens on 127.0.0.1; a request whose Host isn't 127.0.0.1, localhost or [::1] is refused (DNS rebinding), and so is a change whose Origin isn't this server's own host and port (another site, or another program on this computer). Pages allow scripts only from the server itself. A failed model call gives the customer a plain "try again" and logs only the error's kind and status.
 - **One request at a time** uses the conversation store, the model call included: enough for a demo on one computer, and simpler than sharing the SQLite connection safely.
 - **Every page**, a missing one included, ends with "A demo for Halimbawa Money, a made-up company. Not affiliated with any real company." (G2)
+
+## The showcase, as built
+
+- **`showcase/server.py`** runs the web app on a made-up morning. By default its model refuses to be called, for the hand-off screenshots; with `--claude`, Claude Haiku answers with keyword search, asked live with the key and saved in `docs/showcase/claude-answers.json`, or replayed from there without one.
+- **Scripts** (Playwright, plain Node): `shots.cjs` and `claude_shots.cjs` take the screenshots; `walkthrough.cjs` records the captioned video with Chromium's screencast and ffmpeg. See `docs/showcase/README.md`.
 
 ## Time and privacy
 
@@ -122,4 +137,4 @@ GitHub Actions: ruff, pyright, pytest (with the recorded answers), and a check t
 | M5 | The chat page, the agent's view, the owner's view, the audit log | E1–E4, G1, G2 |
 | M6 | Live scores, README, screenshots and the walkthrough video | — |
 
-Each milestone ends with a code review. The live evaluation needs the owner's API key, run on the owner's machine; everything else runs without one.
+Each milestone ends with a code review. The live evaluation needs the owner's API key (in a cloud session, `OWNER_ANTHROPIC_API_KEY`); everything else runs without one.

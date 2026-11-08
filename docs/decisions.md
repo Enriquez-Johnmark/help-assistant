@@ -16,3 +16,7 @@ Every decision the owner made, dated.
 - **Spec Round 3:** 27 acceptance criteria (A1–G2); the spec is complete.
 - **Architecture** (`docs/architecture.md`): one Python package with the rules in `core/`; local BM25 and fastembed search combined by reciprocal rank fusion; Claude answers parsed into a Pydantic type and checked in code; SQLite with an append-only audit log; recorded model answers for tests and CI; build order M1–M6.
 - **B2 clarified:** an answer may repeat the customer's own figures from their question ("sending ₱3,000 costs ₱35"); any other figure must be on a cited page.
+
+## 2026-11-08
+
+- **Keyword search by default:** the recorded run on the 150 test questions met the targets (F2) with keyword search alone (Haiku 88% right answers, 92% right page; Sonnet 86%, 91%) and missed them with keyword and embeddings combined (Haiku 83%, 89%; Sonnet 84%, 89%), losing mostly on Tagalog questions. `serve`, `ask`, `search` and CI's F2 check now use keyword search; combined search stays an option (`--mode combined`) and stays in the report (F3). Not tuned further on the test set, so it stays an honest measure.
