@@ -26,6 +26,16 @@ def test_a_grounded_answer_reaches_the_customer() -> None:
     assert reply.cited == [FEES]
 
 
+def test_the_assistant_searches_by_keyword_by_default_the_mode_that_met_the_targets() -> None:
+    # Measured on the test set on 2026-11-08 (docs/decisions.md): keyword search
+    # alone met F2 and combined search didn't, so no embedding model is needed.
+    fake = FakeAnswerer(lambda _: answer("Sending ₱3,000 for branch pickup costs ₱35.", [FEES]))
+    reply = Assistant(Searcher(PASSAGES, embedder=None), fake).respond(
+        Conversation(), "How much is the fee to send 3,000 for branch pickup?"
+    )
+    assert reply.kind == "answer"
+
+
 @pytest.mark.parametrize(
     "raw",
     [

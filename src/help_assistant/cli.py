@@ -48,13 +48,15 @@ def main(argv: list[str] | None = None) -> int:
     commands.add_parser("index", help="read the help pages into the database")
     search = commands.add_parser("search", help="the passages a question finds")
     search.add_argument("question")
-    search.add_argument("--mode", choices=["combined", "keyword"], default="combined")
+    search.add_argument("--mode", choices=["keyword", "combined"], default="keyword")
     ask = commands.add_parser("ask", help="the assistant's answer to a question")
     ask.add_argument("question")
     ask.add_argument("--model", choices=["haiku", "sonnet"], default="haiku")
+    ask.add_argument("--mode", choices=["keyword", "combined"], default="keyword", help=SEARCH_HELP)
     serve = commands.add_parser("serve", help="the chat page and the staff views, on this computer only")
     serve.add_argument("--port", type=int, default=8000)
     serve.add_argument("--model", choices=["haiku", "sonnet"], default="haiku")
+    serve.add_argument("--mode", choices=["keyword", "combined"], default="keyword", help=SEARCH_HELP)
     evaluate = commands.add_parser("eval", help="score the test set (F2, F3)")
     evaluate.add_argument("--record", action="store_true", help="ask Claude live and record its answers")
     evaluate.add_argument("--models", default="haiku,sonnet", help="comma-separated: haiku, sonnet")
@@ -81,7 +83,9 @@ def main(argv: list[str] | None = None) -> int:
                 " (in a cloud session: an environment variable, OWNER_ANTHROPIC_API_KEY)"
             )
     if args.command == "serve":
-        assistant = Assistant(Searcher(passages, FastEmbedder()), ClaudeAnswerer(MODELS[args.model]))
+        assistant = Assistant(
+            searcher(passages, args.mode), ClaudeAnswerer(MODELS[args.model]), mode=args.mode
+        )
         app = create_app(ChatService(db, SystemClock(), assistant))
         print(f"Chat: http://127.0.0.1:{args.port}/   Agents: /agent   Help content: /owner")
         # 127.0.0.1 only: the demo is never reachable from another computer (G1).
@@ -89,7 +93,9 @@ def main(argv: list[str] | None = None) -> int:
         return 0
     if args.command == "ask":
         answerer = ClaudeAnswerer(MODELS[args.model])
-        reply = Assistant(Searcher(passages, FastEmbedder()), answerer).respond(Conversation(), args.question)
+        reply = Assistant(searcher(passages, args.mode), answerer, mode=args.mode).respond(
+            Conversation(), args.question
+        )
         print(reply.text)
         if reply.cited:
             print(f"\nFrom: {', '.join(reply.cited)}")
@@ -98,13 +104,22 @@ def main(argv: list[str] | None = None) -> int:
         for broken in reply.broken:
             print(f"(refused: {broken.detail})")
         return 0
-    searcher = Searcher(passages, FastEmbedder() if args.mode == "combined" else None)
-    for hit in searcher.search(args.question, 5, mode=args.mode):
+    for hit in searcher(passages, args.mode).search(args.question, 5, mode=args.mode):
         print(f"{hit.passage.id}\n  {hit.passage.text.splitlines()[1][:100]}")
     return 0
 
 
 RECORDED = Path("evalset/recorded")
+# Keyword search alone met the targets on the test set and combined search
+# didn't (docs/decisions.md, 2026-11-08), so it is the default.
+SEARCH_HELP = "keyword (default, measured best) or combined with the local embedding model"
+
+
+def searcher(passages: list[Passage], mode: Mode) -> Searcher:
+    """The embedding model is loaded only for combined search."""
+    return Searcher(passages, FastEmbedder() if mode == "combined" else None)
+
+
 MODELS = {"haiku": HAIKU, "sonnet": SONNET}
 
 

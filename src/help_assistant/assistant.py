@@ -47,7 +47,7 @@ class Assistant:
     """Answers from the help pages, or says "I don't know", or hands off."""
 
     def __init__(
-        self, searcher: Searcher, answerer: Answerer, threshold: float = 0.6, mode: Mode = "combined"
+        self, searcher: Searcher, answerer: Answerer, threshold: float = 0.6, mode: Mode = "keyword"
     ) -> None:
         self._searcher = searcher
         self._answerer = answerer
