@@ -9,7 +9,6 @@ from help_assistant.evaluation.testset import load_questions
 from help_assistant.model.client import HAIKU, SONNET, NotRecordedError, RecordedAnswerer, load_recordings
 from help_assistant.pages.reader import read_pages
 from help_assistant.search.combined import Searcher
-from help_assistant.search.embeddings import FastEmbedder
 from tests.fixtures.answerers import FakeAnswerer
 
 QUESTIONS = load_questions(Path("evalset/questions.jsonl"))
@@ -82,15 +81,15 @@ def test_f2_the_recorded_answers_meet_the_targets() -> None:
     try:
         results = run(
             QUESTIONS,
-            Searcher(PASSAGES, FastEmbedder()),
+            Searcher(PASSAGES, embedder=None),
             RecordedAnswerer(recordings, HAIKU),
             grader,
-            "combined",
+            "keyword",
         )
     except NotRecordedError:
         pytest.fail(
             "a request isn't recorded: the prompt, the test set, the help pages or the passages search finds"
-            " (which depend on the embedding model) changed since recording;"
+            " changed since recording;"
             " run `help-assistant eval --record`"
         )
     scores = score(results)
