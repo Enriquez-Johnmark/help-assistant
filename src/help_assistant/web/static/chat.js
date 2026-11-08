@@ -56,7 +56,7 @@ function render(data) {
         m.cited.forEach((c, i) => {
           const link = document.createElement("a");
           link.href = c.url;
-          link.textContent = c.title;
+          link.textContent = c.section ? `${c.title}: ${c.section}` : c.title;
           if (i) from.append(", ");
           from.append(link);
         });

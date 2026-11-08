@@ -121,6 +121,8 @@ def test_b1_an_answer_links_to_the_help_page_it_comes_from() -> None:
     reply = web.get(f"/api/conversations/{conversation}/messages").json()["messages"][-1]
     [link] = reply["cited"]
     assert link["url"] == "/pages/login-and-otp#if-the-otp-doesn-t-arrive"
+    # The section too, so two sections cited from one page read differently.
+    assert link["section"] == "If the OTP doesn't arrive"
     page = web.get(link["url"]).text
     assert link["title"] in page
     assert 'id="if-the-otp-doesn-t-arrive"' in page

@@ -2,6 +2,7 @@
 content owner's view, over a small JSON API. It answers only on this computer
 (G1) and every page says it is a demo for a made-up company (G2)."""
 
+import json
 import logging
 import threading
 from collections.abc import Awaitable, Callable
@@ -142,12 +143,28 @@ def create_app(service: ChatService) -> FastAPI:
             request, "error.html", {"detail": error.detail}, status_code=error.status_code
         )
 
+    def headings(ids: list[str]) -> dict[str, str]:
+        rows = service.db.execute(
+            "select id, heading from passages where id in (select value from json_each(?))",
+            (json.dumps(ids),),
+        )
+        return {row["id"]: row["heading"] for row in rows}
+
     def cited(ids: list[str]) -> list[dict[str, str]]:
         known = act(titles)
+        # The section's heading too, so two sections of one page read differently.
+        sections = act(lambda: headings(ids)) if ids else {}
         links: list[dict[str, str]] = []
         for passage in ids:
             page = passage.split("#")[0]
-            links.append({"id": passage, "title": known.get(page, page), "url": f"/pages/{passage}"})
+            links.append(
+                {
+                    "id": passage,
+                    "title": known.get(page, page),
+                    "section": sections.get(passage, ""),
+                    "url": f"/pages/{passage}",
+                }
+            )
         return links
 
     def message(m: Message) -> dict[str, Any]:
