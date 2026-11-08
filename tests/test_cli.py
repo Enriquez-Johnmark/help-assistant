@@ -45,10 +45,12 @@ def test_ask_without_an_api_key_says_where_to_put_it(
 
 
 def test_eval_without_recordings_says_how_to_record(
-    tmp_path: Path, capsys: pytest.CaptureFixture[str]
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
 ) -> None:
     db = str(tmp_path / "help.db")
     main(["--db", db, "index"])
+    # Away from the repository, whose own recordings would be found.
+    monkeypatch.chdir(tmp_path)
     with pytest.raises(SystemExit):
         main(["--db", db, "eval", "--modes", "keyword"])
     assert "eval --record" in capsys.readouterr().err
