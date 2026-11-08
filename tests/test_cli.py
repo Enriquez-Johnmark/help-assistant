@@ -26,6 +26,9 @@ def test_ask_without_an_api_key_says_where_to_put_it(
     db = str(tmp_path / "help.db")
     main(["--db", db, "index"])
     monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    # A cloud session keeps the owner's key under its own name: without this,
+    # the test would find it and ask Claude live.
+    monkeypatch.delenv("OWNER_ANTHROPIC_API_KEY", raising=False)
     monkeypatch.chdir(tmp_path)
     with pytest.raises(SystemExit):
         main(
