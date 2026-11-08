@@ -8,6 +8,7 @@ Screenshots of the chat and the staff views, on the made-up company Halimbawa Mo
 
 | File | Shows |
 | --- | --- |
+| `walkthrough.mp4` | About a minute and three quarters, with captions: Claude answering in Tagalog with links to its sources, an instruction hidden in a question ignored, "I don't know", lost money and an OTP handed to a person, an agent's reply and the owner's view |
 | `desktop-1-chat.png` | A customer in Tagalog says money is lost and types an OTP by mistake: the OTP is hidden, they are warned, handed to a person, and an agent replies |
 | `desktop-2-agents.png` | The agents' list: money issues first, then the longest waiting; secrets already hidden, a card number included |
 | `desktop-3-conversation.png` | One conversation, where an agent, by name, replies, hands back to the assistant or closes |
@@ -34,4 +35,5 @@ Claude answering, replayed from `claude-answers.json` (asked live, and saved, wh
 ```sh
 uv run python showcase/server.py --claude &
 NODE_PATH="$(npm root -g)" node showcase/claude_shots.cjs
+NODE_PATH="$(npm root -g)" node showcase/walkthrough.cjs   # on a fresh server; needs ffmpeg
 ```
