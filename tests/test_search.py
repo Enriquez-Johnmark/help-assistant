@@ -74,6 +74,6 @@ class FixedEmbedder:
 
 def test_combined_search_scores_follow_its_order() -> None:
     # Keyword search finds only the fees passage; meaning search likes it least.
-    hits = Searcher(PASSAGES, embedder=FixedEmbedder()).search("fees", 3)  # type: ignore[arg-type]
+    hits = Searcher(PASSAGES, embedder=FixedEmbedder()).search("fees", 3, mode="combined")  # type: ignore[arg-type]
     scores = [hit.score for hit in hits]
     assert scores == sorted(scores, reverse=True)

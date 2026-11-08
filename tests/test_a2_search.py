@@ -32,3 +32,9 @@ def test_a2_a_tagalog_or_taglish_question_finds_its_english_page_in_the_top_5(se
 
 def test_a2_the_search_questions_it_was_tuned_on_still_pass(searcher: Searcher) -> None:
     assert share_found(searcher, [(q, [page]) for q, page in QUESTIONS], "combined") >= 0.9
+
+
+def test_search_is_by_keyword_unless_asked_so_it_needs_no_embedding_model() -> None:
+    searcher = Searcher([p for page in read_pages(Path("help_pages")) for p in page.passages], embedder=None)
+    hits = searcher.search("How much is the fee to send money?", 5)
+    assert hits[0].passage.id.startswith("send-money-fees")

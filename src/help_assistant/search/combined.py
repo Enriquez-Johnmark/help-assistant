@@ -39,7 +39,7 @@ class Searcher:
         self._vectors = embedder.embed([p.text for p in passages]) if embedder else []
         self._order = [passage.id for passage in passages]
 
-    def search(self, query: str, k: int, mode: Mode = "combined") -> list[Hit]:
+    def search(self, query: str, k: int, mode: Mode = "keyword") -> list[Hit]:
         if mode == "keyword":
             return self._keyword.search(expand(query), k)
         keyword = self._keyword.search(expand(query), _DEPTH)
