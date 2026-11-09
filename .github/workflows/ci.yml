@@ -9,9 +9,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: astral-sh/setup-uv@v6
+      # uv from PyPI at a pinned version: fetching it from GitHub releases
+      # failed CI three times with 504s (2026-11-08).
+      - run: python3 -m pip install --user "uv==0.11.32"
+      - uses: actions/cache@v4
         with:
-          enable-cache: true
+          path: ~/.cache/uv
+          key: uv-${{ hashFiles('uv.lock') }}
       - run: uv sync --locked
       # The local embedding model (about 240 MB), downloaded once.
       - uses: actions/cache@v4
