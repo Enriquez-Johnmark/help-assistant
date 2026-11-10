@@ -16,8 +16,8 @@
 {% else %}<p>None yet.</p>{% endif %}
 <h2>Audit log</h2>
 {% if log %}
-<table><tr><th>When</th><th>Who</th><th>What</th><th>Conversation</th></tr>
-{% for e in log|reverse %}<tr><td>{{ e.at|manila }}</td><td>{{ e.actor }}</td><td>{{ actions.get(e.action, e.action) }}</td><td><a href="/agent/{{ e.conversation_id }}">{{ e.conversation_id[:8] }}</a></td></tr>{% endfor %}
+<table><tr><th>When</th><th>Who</th><th>What</th><th>Chat</th></tr>
+{% for e in log|reverse %}<tr><td>{{ e.at|manila }}</td><td>{{ senders.get(e.actor, e.actor) }}</td><td>{{ actions.get(e.action, e.action) }}</td><td><a href="/agent/{{ e.conversation_id }}">{{ e.conversation_id[:8] }}</a></td></tr>{% endfor %}
 </table>
 {% else %}<p>Nothing logged yet.</p>{% endif %}
 {% endblock %}

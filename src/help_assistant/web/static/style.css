@@ -5,9 +5,11 @@ header { display: flex; justify-content: space-between; align-items: center; gap
   padding: .75rem 1rem; background: var(--brand); color: #fff; }
 header a { color: #fff; margin-left: 1rem; }
 main { max-width: 46rem; margin: 0 auto; padding: 1rem; }
+main a { color: var(--brand); text-underline-offset: .15em; }
 footer { max-width: 46rem; margin: 2rem auto; padding: 1rem; color: var(--muted); font-size: .9rem;
   border-top: 1px solid var(--line); }
-h1 { font-size: 1.5rem; }
+h1 { font-size: 1.75rem; line-height: 1.2; }
+h2 { font-size: 1.125rem; margin-top: 1.75rem; }
 .hint, .status, small { color: var(--muted); }
 ol { list-style: none; padding: 0; }
 #messages li, .transcript li { margin: .5rem 0; padding: .6rem .8rem; border-radius: .6rem; background: #fff;
@@ -24,7 +26,7 @@ button.link { background: none; color: var(--brand); padding: 0; text-decoration
 form p button + button { margin-left: .5rem; background: #fff; color: var(--brand); border: 1px solid var(--brand); }
 .waiting { border: 1px solid var(--line); border-radius: .6rem; padding: .5rem 1rem; margin: 1rem 0; background: #fff; }
 .waiting.money { border-color: var(--warn); }
-.waiting h2 { font-size: 1rem; word-break: break-all; }
+.waiting h2 { font-size: 1rem; margin-top: .5rem; }
 .badge { background: var(--warn); color: #fff; border-radius: .3rem; padding: 0 .4rem; font-size: .85rem; }
 .error { color: var(--warn); }
 table { border-collapse: collapse; width: 100%; margin-bottom: 1rem; }
