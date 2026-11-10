@@ -26,6 +26,12 @@ Status: built. The [brief](docs/product/brief.md), [spec](docs/product/spec.md) 
 
 The answers are Claude Haiku's, recorded with the owner's key; the hand-offs are decided in code before any model is asked ([how they were made](docs/showcase/README.md)).
 
+## Where the data comes from
+
+- **In the demo:** 25 made-up help pages of a made-up company, Halimbawa Money, as Markdown files in [`help_pages/`](help_pages/), each marked `made_up: true` (a test refuses any page that isn't). `uv run help-assistant index` reads them into passages and builds the search index. The 150 test questions in `evalset/questions.jsonl` are made up too.
+- **For a real company:** its own help-centre articles, saved as Markdown files with the same short front matter (title and topic) in a folder, and indexed the same way (`--pages <folder>`). The assistant answers only from those pages; it never looks anything up on an account.
+- Nothing in this repository is a real company's content or a real customer's message.
+
 ## Why you can trust an answer
 
 The model writes each answer; code decides whether a customer sees it. An answer is shown only if it parsed into a strict type, its confidence meets the threshold, every page it cites was one search found, every figure in it is on a cited page or in the customer's own question, it promises nothing and asks for no secret, and it is in the customer's language. Any failure gives "I don't know", never the model's text. The reasons are in the ADRs: [secrets are hidden first](docs/adr/0001-secrets-are-hidden-before-anything-else.md), [answers are checked in code](docs/adr/0002-answers-are-checked-in-code.md).
