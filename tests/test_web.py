@@ -174,3 +174,20 @@ def test_a_help_pages_table_is_shown_as_a_table() -> None:
     assert "<th>Amount sent</th>" in page
     assert "<td>Up to ₱1,000</td>" in page
     assert "| ---" not in page
+
+
+def test_e1_staff_pages_use_plain_words_not_codes() -> None:
+    web = client()
+    conversation = web.post("/api/conversations").json()["id"]
+    web.post(f"/api/conversations/{conversation}/messages", json={"text": "Can I talk to a real person?"})
+
+    agents = web.get("/agent").text
+    owner = web.get("/owner").text
+
+    # A chat is named by a short ID, as in the audit log; who spoke is capitalised.
+    assert f"Chat {conversation[:8]}" in agents
+    assert f">Conversation {conversation}<" not in agents
+    assert "<b>Customer:</b>" in agents
+    # The audit log says what happened in words.
+    assert "Handed to a person" in owner
+    assert "<td>handoff</td>" not in owner

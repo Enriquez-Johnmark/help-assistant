@@ -6,14 +6,14 @@
 {% if not waiting %}<p>No one is waiting.</p>{% endif %}
 {% for w in waiting %}
 <article class="waiting{% if w.money_involved %} money{% endif %}">
-  <h2><a href="/agent/{{ w.id }}">Conversation {{ w.id }}</a></h2>
+  <h2><a href="/agent/{{ w.id }}">Chat {{ w.id[:8] }}</a></h2>
   <p>
     {% if w.money_involved %}<span class="badge">Money</span>{% endif %}
     {{ reasons.get(w.reason, w.reason) }} ·
     {% if w.status == "with_agent" %}with an agent{% else %}waiting{% endif %} since {{ w.waiting_since|manila }}
   </p>
   <ol class="transcript">
-    {% for m in w.messages %}<li class="{{ m.sender }}"><b>{{ m.sender }}:</b> {{ m.text }}</li>{% endfor %}
+    {% for m in w.messages %}<li class="{{ m.sender }}"><b>{{ senders.get(m.sender, m.sender) }}:</b> {{ m.text }}</li>{% endfor %}
   </ol>
 </article>
 {% endfor %}

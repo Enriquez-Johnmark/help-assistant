@@ -88,11 +88,29 @@ def _local(host: str | None) -> bool:
     return urlsplit(f"//{host}").hostname in LOCAL_NAMES
 
 
+# What staff read for the stored codes.
+SENDERS = {"customer": "Customer", "assistant": "Assistant", "agent": "Agent"}
+ACTIONS = {
+    "handoff": "Handed to a person",
+    "reply": "An agent replied",
+    "hand_back": "Handed back to the assistant",
+    "close": "Closed",
+}
+
+
+def topic_name(topic: str) -> str:
+    """A help page topic as staff read it: "bills-payment" → "Bills payment"."""
+    return topic.replace("-", " ").capitalize()
+
+
 def create_app(service: ChatService) -> FastAPI:
     app = FastAPI(title="Help Assistant (demo)", docs_url=None, redoc_url=None, openapi_url=None)
     templates = Jinja2Templates(directory=HERE / "templates")
     templates.env.filters["manila"] = manila_time  # pyright: ignore[reportUnknownMemberType]
     templates.env.globals["demo_note"] = DEMO_NOTE  # pyright: ignore[reportUnknownMemberType, reportArgumentType]
+    templates.env.globals["senders"] = SENDERS  # pyright: ignore[reportUnknownMemberType, reportArgumentType]
+    templates.env.globals["actions"] = ACTIONS  # pyright: ignore[reportUnknownMemberType, reportArgumentType]
+    templates.env.filters["topic"] = topic_name  # pyright: ignore[reportUnknownMemberType]
     app.mount("/static", StaticFiles(directory=HERE / "static"), name="static")
     # One request at a time touches the conversation store: a demo on one computer.
     lock = threading.Lock()
