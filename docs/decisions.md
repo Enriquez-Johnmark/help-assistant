@@ -20,3 +20,7 @@ Every decision the owner made, dated.
 ## 2026-11-08
 
 - **Keyword search by default:** the recorded run on the 150 test questions met the targets (F2) with keyword search alone (Haiku 88% right answers, 92% right page; Sonnet 86%, 91%) and missed them with keyword and embeddings combined (Haiku 83%, 89%; Sonnet 84%, 89%), losing mostly on Tagalog questions. `serve`, `ask`, `search` and CI's F2 check now use keyword search; combined search stays an option (`--mode combined`) and stays in the report (F3). Not tuned further on the test set, so it stays an honest measure.
+
+## 2026-11-10
+
+- **UI polish with `ui-taste`:** Uizze's `ui-taste` skill (v0.3.0, Apache-2.0) is added, pinned and recorded, without the paid Uizze MCP. Every product gets an audit (look only, with real desktop and phone screenshots), then a polish pass that keeps its current look, one product at a time: Lab Report Assistant, Kompleto, Balanse, Review Triage Agent, Help Assistant, then the portfolio; each product's screenshots, video and portfolio page are remade before the next starts. Every rule that protects an acceptance criterion stays in code, and every test must still pass (owner: "yes to all").

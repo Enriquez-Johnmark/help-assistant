@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "ui-taste": {
+      "source": "uizze.sh",
+      "sourceType": "well-known",
+      "skillPath": "ui-taste/SKILL.md",
+      "computedHash": "9a37107c51b6bf6e3bdc2675d559094619b1b03092f8466c32ffc8e0cb9c1d4a"
+    }
+  }
+}

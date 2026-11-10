@@ -22,6 +22,7 @@ Every decision needing the owner's judgement is put as numbered rounds of questi
 ## Working here
 
 - **The `milestone` skill** (`.claude/skills/milestone/SKILL.md`) is the workflow for building a milestone, from the first failing test to the code review. Read it before changing `src/`.
+- **UI polish:** **`ui-taste`** (`.claude/skills/ui-taste`, added 2026-11-10): Uizze's UI audit and polish playbooks, version 0.3.0 from uizze.sh, Apache-2.0 (notices in its `NOTICE`), copied unchanged after being read in full and checked against its `CHECKSUMS.sha256`, and pinned by the folder hash in `skills-lock.json`; the unpinned `npx skills add` installer was not used. Use `reference/audit.md`, then `polish.md`, `craft.md` and the web parts of `anti-slop-craft.md`; skip the iOS and mobile playbooks, the paid Uizze MCP and the image-first step. Polish keeps the current look; it is not a redesign.
 - **Cloud sessions:** `scripts/cloud-session-start.sh` runs at session start (via `.claude/settings.json`): commit signing, `uv sync`, and indexing the help pages. On a local machine it does nothing.
 
 ## Rules
