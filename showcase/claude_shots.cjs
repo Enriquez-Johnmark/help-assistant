@@ -47,6 +47,26 @@ async function main() {
     await page.close()
   }
 
+  // More questions the pages don't answer, asked without screenshots, so the
+  // owner's view shows what to write next.
+  for (const question of [
+    "Can I send money to Japan from the app?",
+    "Pwede ba akong magbukas ng dollar account sa inyo?",
+    "Do you buy gold bars or only pawn them?",
+  ]) {
+    const page = await browser.newPage(desktop)
+    watch(page)
+    await chat(page, [question])
+    await page.close()
+  }
+
+  // The owner's view: the questions the pages couldn't answer, by topic.
+  const owner = await browser.newPage(desktop)
+  watch(owner)
+  await owner.goto(`${base}/owner`)
+  await owner.screenshot({ path: `${out}/desktop-10-claude-owner-unanswered.png`, fullPage: true })
+  await owner.close()
+
   const phone = await browser.newPage({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, isMobile: true })
   watch(phone)
   await chat(phone, ["Paano mag-sangla ng alahas?"])
